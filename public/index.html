@@ -3126,7 +3126,7 @@
               body = { model: this.config.model, messages: [{ role: 'user', content: `${roleConfig.system}\n\n${prompt}` }], temperature: 0.3, stream: !!onStream };
               break;
             case 'deepseek':
-              url = this.config.baseUrl || 'https://api.deepseek.com/v1/chat/completions';
+              url = this.config.baseUrl || 'https://api.deepseek.com/chat/completions';
               headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
               body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
               break;
