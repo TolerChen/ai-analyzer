@@ -23,6 +23,50 @@ app.post('/api/ai/analyze', async (req, res) => {
       });
     }
 
+    // 检查是否在Vercel环境中或无法访问Ollama
+    const isVercel = process.env.VERCEL === '1';
+    
+    if (isVercel) {
+      // 在Vercel环境中，直接使用模拟分析
+      console.log('Running in Vercel environment, using fallback analysis');
+      const lower = text.toLowerCase();
+      const tags = [];
+      let category = '未识别内容';
+      let advice = 'AI分析暂时不可用，使用基础分析。';
+
+      if (/会议|纪要|讨论|反馈|会议纪要/.test(lower)) {
+        category = '会议纪要';
+        advice = '建议将该内容整理成会议结果和后续行动。';
+        tags.push('会议', '纪要');
+      }
+      if (/待办|TODO|需处理|需确认|跟进|后续/.test(lower)) {
+        category = '待办事项';
+        advice = '该输入看起来像待办项，建议及时分配负责人。';
+        tags.push('待办', '跟进');
+      }
+      if (/交付|交付物|清单|方案|报价/.test(lower)) {
+        category = '交付物/输出';
+        advice = '该内容可能属于交付物或验收项。';
+        tags.push('交付', '输出');
+      }
+      if (/风险|风险点|问题|名词不锁定|不明确/.test(lower)) {
+        category = '风险提示';
+        advice = '请将该项纳入风险跟踪，避免后续返工。';
+        tags.push('风险', '待解决');
+      }
+      if (/工艺文件|零件命名表|现场勘探|UI设计/.test(lower)) {
+        category = '附件/资料';
+        advice = '该内容可作为关键资料归档。';
+        tags.push('资料', '附件');
+      }
+
+      if (tags.length > 1) {
+        category = tags.includes('待办') ? '待办事项' : category;
+      }
+
+      return res.json({ category, advice, tags: tags.length ? tags : ['一般输入'] });
+    }
+
     // 构建Ollama的提示词
     const prompt = `分析以下内容，判断其类型并提供建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}`;
 
@@ -34,7 +78,8 @@ app.post('/api/ai/analyze', async (req, res) => {
     console.error('AI分析错误:', error);
     
     // 如果Ollama调用失败，回退到模拟分析
-    const lower = text.toLowerCase();
+    const { text } = req.body;
+    const lower = text ? text.toLowerCase() : '';
     const tags = [];
     let category = '未识别内容';
     let advice = 'AI分析暂时不可用，使用基础分析。';
