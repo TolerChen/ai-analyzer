@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Analyzer - 智能分析工具</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+    
+    .input-section {
+      margin-bottom: 30px;
+    }
+    
+    .input-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    
+    .tab-button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .input-panel {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: #ffffff;
+      font-size: 1rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    
+    .upload-area {
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: #ffffff;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .result-section {
+      margin-top: 30px;
+    }
+    
+    .result-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .result-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .result-meta {
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+    
+    .result-content {
+      margin-bottom: 20px;
+    }
+    
+    .result-item {
+      margin-bottom: 15px;
+    }
+    
+    .result-label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #667eea;
+    }
+    
+    .result-value {
+      line-height: 1.6;
+    }
+    
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .tag {
+      background: rgba(102, 126, 234, 0.3);
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    
+    .status-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .status-dot.connected {
+      background: #4caf50;
+    }
+    
+    .nav-bar {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-link {
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .status-dot.disconnected {
+      background: #f44336;
+    }
+    
+    .ai-service-selector {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .role-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .role-btn {
+      padding: 6px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .role-btn:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.3);
+    }
+    
+    .role-btn:active {
+      transform: translateY(1px);
+    }
+    
+    .model-selector {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .model-select {
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    
+    .model-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .input-tabs {
+        flex-wrap: wrap;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .ai-service-selector {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .status-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <div class="nav-title">AI Analyzer</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">分析工具</a>
+        <a href="config.html" class="nav-link">AI身份配置</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>AI Analyzer</h1>
+      <p>智能分析工具 - 支持会议内容、待办事项、风险问题等分析</p>
+    </div>
+    
+    <div class="status-bar">
+      <div class="status-indicator">
+        <div class="status-dot disconnected" id="aiStatusDot"></div>
+        <span id="aiStatusText">本地AI服务未连接</span>
+      </div>
+      <div class="ai-service-selector">
+        <select id="aiServiceSelect" class="model-select" style="margin-right: 15px;">
+          <option value="local">本地Ollama</option>
+          <option value="cloud">云端API</option>
+        </select>
+        <div id="localModelSection">
+          <label for="modelSelect" style="margin-right: 10px;">模型:</label>
+          <select id="modelSelect" class="model-select">
+            <option value="qwen3:8b">qwen3:8b</option>
+            <option value="qwen3:4b">qwen3:4b</option>
+            <option value="llama3">llama3</option>
+            <option value="gemma">gemma</option>
+          </select>
+        </div>
+        <div id="cloudConfigSection" style="display: none;">
+          <button id="cloudConfigBtn" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;">⚙️ 配置</button>
+        </div>
+        <div class="ai-role-selector" style="margin-left: 15px;">
+          <label style="margin-right: 10px;">AI身份:</label>
+          <div class="role-buttons" id="roleButtonsContainer">
+            <button type="button" class="role-btn" data-role="analyst">分析助手</button>
+            <button type="button" class="role-btn" data-role="project_manager">项目经理</button>
+            <button type="button" class="role-btn" data-role="project_shepherd">项目牧羊人</button>
+            <button type="button" class="role-btn" data-role="coach">职场教练</button>
+            <button type="button" class="role-btn" data-role="technical">技术专家</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 云端API配置模态框 -->
+    <div id="cloudConfigModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+      <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; color: #333;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2>云端API配置</h2>
+          <span class="close" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        </div>
+        <div class="modal-body">
+          <!-- API配置列表 -->
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 style="margin: 0;">API接口列表</h3>
+              <button id="addApiConfig" class="btn btn-sm btn-primary">+ 添加新接口</button>
+            </div>
+            <div id="apiConfigList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 10px;">
+              <!-- 动态生成API配置列表 -->
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">API提供商:</label>
+            <select id="apiProvider" class="model-select" style="width: 100%; color: #333; background: #fff;">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="azure">Azure OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="zhipu">智谱AI (GLM)</option>
+              <option value="moonshot">Moonshot (月之暗面)</option>
+              <option value="qwen-api">通义千问 (Qwen)</option>
+              <option value="custom">自定义API</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">API密钥:</label>
+            <input type="password" id="apiKey" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="请输入API密钥">
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">模型:</label>
+            <select id="cloudModel" class="model-select" style="width: 100%; color: #333; background: #fff;">
+              <option value="gpt-4">GPT-4</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+              <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
+              <option value="deepseek-chat">DeepSeek-V3</option>
+              <option value="deepseek-reasoner">DeepSeek-R1</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">API基础URL (可选):</label>
+            <input type="text" id="apiBaseUrl" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="例如: https://api.openai.com/v1">
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button id="saveCloudConfig" class="btn btn-primary">保存配置</button>
+          <button id="cancelCloudConfig" class="btn btn-secondary">取消</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="input-section">
+      <div class="input-tabs">
+        <button class="tab-button active" data-tab="manual">手动输入</button>
+        <button class="tab-button" data-tab="voice">语音输入</button>
+        <button class="tab-button" data-tab="upload">文件上传</button>
+      </div>
+      
+      <div class="input-panel" id="manualPanel">
+        <textarea id="manualInput" placeholder="请输入会议内容、待办事项、风险问题或交付物说明..."></textarea>
+      </div>
+      
+      <div class="input-panel" id="voicePanel" style="display: none;">
+        <div style="text-align: center; padding: 40px;">
+          <button class="btn btn-primary" id="startVoiceBtn">🎤 开始语音输入</button>
+          <p style="margin-top: 20px; opacity: 0.7;">点击按钮开始语音输入，说完后自动停止</p>
+          <textarea id="voiceTranscript" placeholder="语音识别结果将显示在这里..." style="margin-top: 20px;"></textarea>
+        </div>
+      </div>
+      
+      <div class="input-panel" id="uploadPanel" style="display: none;">
+        <div class="upload-area" id="uploadDropZone">
+          <input type="file" id="fileInput" style="display: none;" accept=".txt,.md,.js,.py,.json,.csv,.log" multiple>
+          <p>📁 点击或拖拽文件到此处上传</p>
+          <p style="margin-top: 10px; opacity: 0.7;">支持 .txt, .md, .js, .py, .json, .csv, .log 格式</p>
+          <div id="fileList" style="margin-top: 20px; text-align: left;"></div>
+        </div>
+      </div>
+      
+      <div class="controls">
+        <button class="btn btn-primary" id="analyzeBtn">🤖 AI智能分析</button>
+        <button class="btn btn-secondary" id="clearBtn">清空</button>
+      </div>
+    </div>
+    
+    <div class="result-section">
+      <div class="result-card">
+        <div class="result-header">
+          <h2 class="result-title">AI智能分析结果</h2>
+          <span class="result-meta" id="analysisTimestamp"></span>
+        </div>
+        
+        <div class="result-content">
+          <div class="result-item">
+            <div class="result-label">分析状态:</div>
+            <div class="result-value" id="analysisSummary">等待输入...</div>
+          </div>
+          
+          <div class="result-item">
+            <div class="result-label">内容分类:</div>
+            <div class="result-value" id="analysisCategory">-</div>
+          </div>
+          
+          <div class="result-item">
+            <div class="result-label">智能建议:</div>
+            <div class="result-value" id="analysisAdvice"></div>
+          </div>
+          
+          <div class="result-item">
+            <div class="result-label">关键词标签:</div>
+            <div class="tags" id="analysisTags"></div>
+          </div>
+          
+          <div class="result-item">
+            <div class="result-label">分析模式:</div>
+            <div class="result-value" id="analysisMeta"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    class CloudAIClient {
+      constructor() {
+        this.configs = [];
+        this.currentConfigIndex = 0;
+        this.isConfigured = false;
+      }
+
+      setConfig(config) {
+        if (this.configs.length === 0) {
+          this.configs.push(config);
+        } else {
+          this.configs[this.currentConfigIndex] = config;
+        }
+        this.isConfigured = !!config.apiKey;
+        this.saveConfigs();
+      }
+
+      addConfig(config) {
+        this.configs.push(config);
+        this.currentConfigIndex = this.configs.length - 1;
+        this.isConfigured = !!config.apiKey;
+        this.saveConfigs();
+      }
+
+      deleteConfig(index) {
+        if (this.configs.length > 1) {
+          this.configs.splice(index, 1);
+          if (this.currentConfigIndex >= this.configs.length) {
+            this.currentConfigIndex = this.configs.length - 1;
+          }
+          this.isConfigured = !!this.configs[this.currentConfigIndex].apiKey;
+          this.saveConfigs();
+        }
+      }
+
+      setCurrentConfigIndex(index) {
+        if (index >= 0 && index < this.configs.length) {
+          this.currentConfigIndex = index;
+          this.isConfigured = !!this.configs[this.currentConfigIndex].apiKey;
+          this.saveConfigs();
+        }
+      }
+
+      get config() {
+        return this.configs[this.currentConfigIndex] || {
+          provider: 'openai',
+          apiKey: '',
+          model: 'gpt-4',
+          baseUrl: ''
+        };
+      }
+
+      saveConfigs() {
+        localStorage.setItem('cloudAIConfigs', JSON.stringify({
+          configs: this.configs,
+          currentIndex: this.currentConfigIndex
+        }));
+      }
+
+      loadConfig() {
+        const savedData = localStorage.getItem('cloudAIConfigs');
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          this.configs = data.configs || [];
+          this.currentConfigIndex = data.currentIndex || 0;
+          this.isConfigured = this.configs.length > 0 && !!this.configs[this.currentConfigIndex].apiKey;
+        } else {
+          // 向后兼容旧配置
+          const oldConfig = localStorage.getItem('cloudAIConfig');
+          if (oldConfig) {
+            this.configs = [JSON.parse(oldConfig)];
+            this.currentConfigIndex = 0;
+            this.isConfigured = !!this.configs[0].apiKey;
+            this.saveConfigs();
+          }
+        }
+      }
+
+      async analyze(text, role = 'analyst', onStream) {
+        if (!this.isConfigured) {
+          throw new Error('云端API未配置');
+        }
+
+        try {
+          // 重新加载最新的提示词配置
+          const currentPrompts = getCurrentRolePrompts();
+          const roleConfig = currentPrompts[role] || currentPrompts.analyst;
+          const prompt = roleConfig.prompt.replace('${text}', text);
+
+          let url, headers, body;
+
+          switch (this.config.provider) {
+            case 'openai':
+              url = this.config.baseUrl || 'https://api.openai.com/v1/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'anthropic':
+              url = this.config.baseUrl || 'https://api.anthropic.com/v1/messages';
+              headers = {
+                'Content-Type': 'application/json',
+                'x-api-key': this.config.apiKey,
+                'anthropic-version': '2023-06-01'
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'user', content: `${roleConfig.system}\n\n${prompt}` }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'azure':
+              url = this.config.baseUrl || 'https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2024-02-15-preview';
+              headers = {
+                'Content-Type': 'application/json',
+                'api-key': this.config.apiKey
+              };
+              body = {
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'deepseek':
+              url = this.config.baseUrl || 'https://api.deepseek.com/v1/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'zhipu':
+              url = this.config.baseUrl || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'moonshot':
+              url = this.config.baseUrl || 'https://api.moonshot.cn/v1/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'qwen-api':
+              url = this.config.baseUrl || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            case 'custom':
+              url = this.config.baseUrl + '/chat/completions' || 'https://api.openai.com/v1/chat/completions';
+              headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.config.apiKey}`
+              };
+              body = {
+                model: this.config.model,
+                messages: [
+                  { role: 'system', content: roleConfig.system },
+                  { role: 'user', content: prompt }
+                ],
+                temperature: 0.3,
+                stream: !!onStream
+              };
+              break;
+            default:
+              throw new Error('不支持的API提供商');
+          }
+
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body)
+          });
+
+          if (!response.ok) {
+            try {
+              const errorData = await response.json();
+              const errorMessage = errorData.error?.message || errorData.message || response.statusText;
+              throw new Error(`API调用失败 (${response.status}): ${errorMessage}`);
+            } catch (e) {
+              throw new Error(`API调用失败 (${response.status}): ${response.statusText}`);
+            }
+          }
+
+          if (onStream) {
+            return this.handleStreamResponse(response, onStream);
+          } else {
+            const data = await response.json();
+            let responseText;
+
+            switch (this.config.provider) {
+              case 'openai':
+              case 'deepseek':
+              case 'zhipu':
+              case 'moonshot':
+              case 'qwen-api':
+              case 'custom':
+                responseText = data.choices[0].message.content;
+                break;
+              case 'anthropic':
+                responseText = data.content[0].text;
+                break;
+              case 'azure':
+                responseText = data.choices[0].message.content;
+                break;
+              default:
+                responseText = '';
+            }
+
+            try {
+              const result = JSON.parse(responseText);
+              return result;
+            } catch (e) {
+              // 如果不是有效的JSON，使用默认值
+              return {
+                category: '会议纪要',
+                advice: 'AI分析完成，内容已处理。',
+                tags: ['AI分析', '会议']
+              };
+            }
+          }
+        } catch (error) {
+          console.error('云端API调用失败:', error);
+          throw error;
+        }
+      }
+
+      // 处理流式响应
+      async handleStreamResponse(response, onStream) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let fullResponse = '';
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // 保留不完整的最后一行
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.slice(6);
+              if (dataStr === '[DONE]') continue;
+              
+              try {
+                const data = JSON.parse(dataStr);
+                let content = '';
+                
+                switch (this.config.provider) {
+                  case 'openai':
+                  case 'deepseek':
+                  case 'zhipu':
+                  case 'moonshot':
+                  case 'qwen-api':
+                  case 'custom':
+                  case 'azure':
+                    if (data.choices && data.choices[0]?.delta?.content) {
+                      content = data.choices[0].delta.content;
+                    }
+                    break;
+                  case 'anthropic':
+                    if (data.type === 'content_block_delta' && data.delta?.text) {
+                      content = data.delta.text;
+                    }
+                    break;
+                }
+                
+                if (content) {
+                  fullResponse += content;
+                  onStream(content, fullResponse);
+                }
+              } catch (e) {
+                console.error('解析流式响应失败:', e);
+              }
+            }
+          }
+        }
+
+        try {
+          const result = JSON.parse(fullResponse);
+          return result;
+        } catch (e) {
+          // 如果不是有效的JSON，使用默认值
+          return {
+            category: '会议纪要',
+            advice: 'AI分析完成，内容已处理。',
+            tags: ['AI分析', '会议']
+          };
+        }
+      }
+    }
+
+    class OllamaClient {
+      constructor() {
+        this.baseUrl = 'http://localhost:11434';
+        this.model = 'qwen3:8b';
+        this.isAvailable = false;
+      }
+
+      setModel(model) {
+        this.model = model;
+      }
+
+      async checkStatus() {
+        try {
+          const response = await fetch(`${this.baseUrl}/api/tags`);
+          if (response.ok) {
+            const data = await response.json();
+            this.isAvailable = true;
+            return data.models || [];
+          }
+        } catch (error) {
+          console.log('Ollama服务不可用:', error);
+        }
+        this.isAvailable = false;
+        return [];
+      }
+
+      async analyze(text, role = 'analyst') {
+        if (!this.isAvailable) {
+          return this.getBackupAnalysis(text);
+        }
+
+        try {
+          // 重新加载最新的提示词配置
+          const currentPrompts = getCurrentRolePrompts();
+          const roleConfig = currentPrompts[role] || currentPrompts.analyst;
+          const prompt = roleConfig.prompt.replace('${text}', text);
+
+          const response = await fetch('http://localhost:3001/api/ai/analyze', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              text, 
+              model: this.model,
+              systemPrompt: roleConfig.system
+            })
+          });
+          
+          if (response.ok) {
+            return await response.json();
+          }
+        } catch (error) {
+          console.error('Ollama API调用失败:', error);
+        }
+
+        return this.getBackupAnalysis(text);
+      }
+
+      getBackupAnalysis(text) {
+        const lower = text.toLowerCase();
+        const tags = [];
+        let category = '未识别内容';
+        let advice = 'AI分析暂时不可用，使用基础分析。';
+
+        if (/会议|纪要|讨论|反馈|会议纪要/.test(lower)) {
+          category = '会议纪要';
+          advice = '建议将该内容整理成会议结果和后续行动。';
+          tags.push('会议', '纪要');
+        }
+        if (/待办|TODO|需处理|需确认|跟进|后续/.test(lower)) {
+          category = '待办事项';
+          advice = '该输入看起来像待办项，建议及时分配负责人。';
+          tags.push('待办', '跟进');
+        }
+        if (/交付|交付物|清单|方案|报价/.test(lower)) {
+          category = '交付物/输出';
+          advice = '该内容可能属于交付物或验收项。';
+          tags.push('交付', '输出');
+        }
+        if (/风险|风险点|问题|名词不锁定|不明确/.test(lower)) {
+          category = '风险提示';
+          advice = '请将该项纳入风险跟踪，避免后续返工。';
+          tags.push('风险', '待解决');
+        }
+        if (/工艺文件|零件命名表|现场勘探|UI设计/.test(lower)) {
+          category = '附件/资料';
+          advice = '该内容可作为关键资料归档。';
+          tags.push('资料', '附件');
+        }
+
+        if (tags.length > 1) {
+          category = tags.includes('待办') ? '待办事项' : category;
+        }
+
+        return { category, advice, tags: tags.length ? tags : ['一般输入'] };
+      }
+    }
+
+    const ollamaClient = new OllamaClient();
+    const cloudAIClient = new CloudAIClient();
+    let currentAIService = 'local';
+    let currentAIRole = 'analyst';
+    let selectedTab = 'manual';
+    let uploadedFiles = [];
+
+    // AI身份对应的默认提示词模板
+    const defaultRolePrompts = {
+      analyst: {
+        system: '你是一个专业的智能分析助手，专门用于分析会议内容、待办事项、风险问题等。你的分析需要客观、全面、准确。',
+        prompt: '分析以下内容，判断其类型并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      project_manager: {
+        system: '你是一位经验丰富的项目经理，擅长分析项目相关内容，提供专业的项目管理建议和风险评估。',
+        prompt: '作为项目经理，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      project_shepherd: {
+        system: '你是一位专业的项目牧羊人，擅长追踪项目进展，监控项目状态，确保项目按时交付。',
+        prompt: '作为项目牧羊人，分析以下内容并提供关于项目进展追踪的专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      coach: {
+        system: '你是一位专业的职场教练，擅长分析职场相关内容，提供个人发展和职业规划建议。',
+        prompt: '作为职场教练，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      technical: {
+        system: '你是一位技术专家，擅长分析技术相关内容，提供专业的技术解决方案和建议。',
+        prompt: '作为技术专家，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      }
+    };
+
+    // 加载AI身份提示词配置
+    function loadRolePrompts() {
+      const savedConfig = localStorage.getItem('customRolePrompts');
+      return savedConfig ? JSON.parse(savedConfig) : defaultRolePrompts;
+    }
+
+    // 获取当前AI身份提示词配置
+    function getCurrentRolePrompts() {
+      return loadRolePrompts();
+    }
+
+    // 全局AI身份提示词配置
+    let aiRolePrompts = loadRolePrompts();
+
+    // 获取AI身份的中文名称
+    function getAIRoleName(role) {
+      const defaultRoleNames = {
+        analyst: '分析助手',
+        project_manager: '项目经理',
+        project_shepherd: '项目牧羊人',
+        coach: '职场教练',
+        technical: '技术专家'
+      };
+      
+      // 加载自定义身份名称
+      const customRoles = localStorage.getItem('customRoles');
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        if (customRolesObj[role]) {
+          return customRolesObj[role];
+        }
+      }
+      
+      return defaultRoleNames[role] || '分析助手';
+    }
+
+    // 加载自定义AI身份按钮
+    function loadCustomRoleButtons() {
+      const customRoles = localStorage.getItem('customRoles');
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        const container = document.getElementById('roleButtonsContainer');
+        
+        Object.entries(customRolesObj).forEach(([roleId, roleName]) => {
+          // 创建按钮
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'role-btn';
+          button.dataset.role = roleId;
+          button.textContent = roleName;
+          
+          // 添加到容器
+          container.appendChild(button);
+        });
+      }
+    }
+
+    // 为所有角色按钮添加事件监听器
+    function setupRoleButtonListeners() {
+      document.querySelectorAll('.role-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          // 移除所有按钮的选中状态
+          document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.style.background = 'rgba(0, 0, 0, 0.3)';
+            btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+          });
+          
+          // 设置当前按钮为选中状态
+          this.style.background = 'rgba(102, 126, 234, 0.5)';
+          this.style.border = '1px solid #667eea';
+          
+          // 更新当前AI身份
+          currentAIRole = this.dataset.role;
+          console.log('AI身份已切换为:', getAIRoleName(currentAIRole));
+        });
+      });
+    }
+
+    // 初始化
+    async function init() {
+      cloudAIClient.loadConfig();
+      await checkAIAvailability();
+      setupEventListeners();
+      setupModalListeners();
+      
+      // 加载自定义AI身份按钮
+      loadCustomRoleButtons();
+      // 为所有角色按钮添加事件监听器
+      setupRoleButtonListeners();
+      
+      // 设置默认选中的AI身份
+      document.querySelector('.role-btn[data-role="analyst"]').click();
+    }
+
+    // 检查AI服务可用性
+    async function checkAIAvailability() {
+      if (currentAIService === 'local') {
+        const models = await ollamaClient.checkStatus();
+        const statusDot = document.getElementById('aiStatusDot');
+        const statusText = document.getElementById('aiStatusText');
+
+        if (ollamaClient.isAvailable && models.length > 0) {
+          statusDot.className = 'status-dot connected';
+          statusText.textContent = '本地AI服务已连接';
+        } else {
+          statusDot.className = 'status-dot disconnected';
+          statusText.textContent = '本地AI服务未连接';
+        }
+      } else {
+        const statusDot = document.getElementById('aiStatusDot');
+        const statusText = document.getElementById('aiStatusText');
+
+        if (cloudAIClient.isConfigured) {
+          statusDot.className = 'status-dot connected';
+          statusText.textContent = '云端API已配置';
+        } else {
+          statusDot.className = 'status-dot disconnected';
+          statusText.textContent = '云端API未配置';
+        }
+      }
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 标签切换
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+          const tab = this.dataset.tab;
+          switchTab(tab);
+        });
+      });
+
+      // 分析按钮
+      document.getElementById('analyzeBtn').addEventListener('click', analyzeContent);
+
+      // 清空按钮
+      document.getElementById('clearBtn').addEventListener('click', clearInput);
+
+      // 语音输入按钮
+      document.getElementById('startVoiceBtn').addEventListener('click', startVoiceRecognition);
+
+      // AI服务选择
+      document.getElementById('aiServiceSelect').addEventListener('change', function() {
+        currentAIService = this.value;
+        const localModelSection = document.getElementById('localModelSection');
+        const cloudConfigSection = document.getElementById('cloudConfigSection');
+
+        if (currentAIService === 'local') {
+          localModelSection.style.display = 'block';
+          cloudConfigSection.style.display = 'none';
+        } else {
+          localModelSection.style.display = 'none';
+          cloudConfigSection.style.display = 'block';
+        }
+
+        checkAIAvailability();
+      });
+
+      // 模型选择
+      document.getElementById('modelSelect').addEventListener('change', function() {
+        const selectedModel = this.value;
+        ollamaClient.setModel(selectedModel);
+        console.log('模型已切换为:', selectedModel);
+      });
+
+      // 云端配置按钮
+      document.getElementById('cloudConfigBtn').addEventListener('click', function() {
+        const modal = document.getElementById('cloudConfigModal');
+        modal.style.display = 'block';
+      });
+
+
+
+      // 文件上传
+      const fileInput = document.getElementById('fileInput');
+      const uploadDropZone = document.getElementById('uploadDropZone');
+
+      fileInput.addEventListener('change', handleFileSelect);
+      uploadDropZone.addEventListener('click', () => fileInput.click());
+      uploadDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadDropZone.style.borderColor = '#667eea';
+      });
+      uploadDropZone.addEventListener('dragleave', () => {
+        uploadDropZone.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      });
+      uploadDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadDropZone.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        if (e.dataTransfer.files.length) {
+          handleFiles(e.dataTransfer.files);
+        }
+      });
+    }
+
+    // 根据提供商切换模型列表
+    function updateCloudModelOptions(provider) {
+      const modelSelect = document.getElementById('cloudModel');
+      const baseUrlInput = document.getElementById('apiBaseUrl');
+      
+      const modelOptions = {
+        openai: [
+          { value: 'gpt-4o', label: 'GPT-4o' },
+          { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+          { value: 'gpt-4', label: 'GPT-4' },
+          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+        ],
+        anthropic: [
+          { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+          { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet' },
+          { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku' }
+        ],
+        azure: [
+          { value: 'gpt-4', label: 'GPT-4' },
+          { value: 'gpt-35-turbo', label: 'GPT-3.5 Turbo' }
+        ],
+        deepseek: [
+          { value: 'deepseek-chat', label: 'DeepSeek-V3' },
+          { value: 'deepseek-reasoner', label: 'DeepSeek-R1' }
+        ],
+        zhipu: [
+          { value: 'glm-4', label: 'GLM-4' },
+          { value: 'glm-4-flash', label: 'GLM-4 Flash' },
+          { value: 'glm-3-turbo', label: 'GLM-3 Turbo' }
+        ],
+        moonshot: [
+          { value: 'moonshot-v1-8k', label: 'Moonshot v1 (8K)' },
+          { value: 'moonshot-v1-32k', label: 'Moonshot v1 (32K)' },
+          { value: 'moonshot-v1-128k', label: 'Moonshot v1 (128K)' }
+        ],
+        'qwen-api': [
+          { value: 'qwen-max', label: 'Qwen-Max' },
+          { value: 'qwen-plus', label: 'Qwen-Plus' },
+          { value: 'qwen-turbo', label: 'Qwen-Turbo' }
+        ],
+        custom: [
+          { value: 'custom-model', label: '自定义模型' }
+        ]
+      };
+      
+      const defaultBaseUrls = {
+        openai: 'https://api.openai.com/v1',
+        anthropic: 'https://api.anthropic.com/v1',
+        azure: 'https://YOUR_RESOURCE_NAME.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT_NAME',
+        deepseek: 'https://api.deepseek.com/v1',
+        zhipu: 'https://open.bigmodel.cn/api/paas/v4',
+        moonshot: 'https://api.moonshot.cn/v1',
+        'qwen-api': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        custom: ''
+      };
+      
+      modelSelect.innerHTML = '';
+      const options = modelOptions[provider] || modelOptions.openai;
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.label;
+        modelSelect.appendChild(option);
+      });
+      
+      if (baseUrlInput && defaultBaseUrls[provider] !== undefined) {
+        baseUrlInput.placeholder = '例如: ' + defaultBaseUrls[provider];
+      }
+    }
+
+    // 设置模态框监听器
+    function setupModalListeners() {
+      const modal = document.getElementById('cloudConfigModal');
+      const closeBtn = modal.querySelector('.close');
+      const cancelBtn = document.getElementById('cancelCloudConfig');
+      const saveBtn = document.getElementById('saveCloudConfig');
+      const addApiBtn = document.getElementById('addApiConfig');
+      const apiConfigList = document.getElementById('apiConfigList');
+      const providerSelect = document.getElementById('apiProvider');
+
+      // 渲染API配置列表
+      function renderApiConfigList() {
+        apiConfigList.innerHTML = '';
+        
+        cloudAIClient.configs.forEach((config, index) => {
+          const configItem = document.createElement('div');
+          configItem.style.display = 'flex';
+          configItem.style.justifyContent = 'space-between';
+          configItem.style.alignItems = 'center';
+          configItem.style.padding = '8px';
+          configItem.style.marginBottom = '8px';
+          configItem.style.border = '1px solid #ddd';
+          configItem.style.borderRadius = '4px';
+          configItem.style.backgroundColor = index === cloudAIClient.currentConfigIndex ? '#e3f2fd' : '#fff';
+          
+          const configInfo = document.createElement('div');
+          configInfo.style.flex = '1';
+          configInfo.innerHTML = `
+            <strong>${getProviderName(config.provider)}</strong><br>
+            <small>模型: ${config.model}</small><br>
+            <small>API Key: ${config.apiKey ? '已设置' : '未设置'}</small>
+          `;
+          
+          const configActions = document.createElement('div');
+          configActions.style.display = 'flex';
+          configActions.style.gap = '8px';
+          
+          const selectBtn = document.createElement('button');
+          selectBtn.textContent = '选择';
+          selectBtn.className = 'btn btn-sm btn-primary';
+          selectBtn.addEventListener('click', () => {
+            cloudAIClient.setCurrentConfigIndex(index);
+            loadCurrentConfig();
+            renderApiConfigList();
+          });
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '删除';
+          deleteBtn.className = 'btn btn-sm btn-danger';
+          deleteBtn.addEventListener('click', () => {
+            if (confirm('确定要删除这个API配置吗？')) {
+              cloudAIClient.deleteConfig(index);
+              loadCurrentConfig();
+              renderApiConfigList();
+            }
+          });
+          
+          configActions.appendChild(selectBtn);
+          configActions.appendChild(deleteBtn);
+          configItem.appendChild(configInfo);
+          configItem.appendChild(configActions);
+          apiConfigList.appendChild(configItem);
+        });
+      }
+
+      // 获取提供商名称
+      function getProviderName(provider) {
+        const providerNames = {
+          'openai': 'OpenAI',
+          'anthropic': 'Anthropic',
+          'azure': 'Azure OpenAI',
+          'deepseek': 'DeepSeek',
+          'zhipu': '智谱AI',
+          'moonshot': 'Moonshot',
+          'qwen-api': '通义千问',
+          'custom': '自定义API'
+        };
+        return providerNames[provider] || provider;
+      }
+
+      // 加载当前配置到表单
+      function loadCurrentConfig() {
+        const config = cloudAIClient.config;
+        document.getElementById('apiProvider').value = config.provider;
+        document.getElementById('apiKey').value = config.apiKey;
+        document.getElementById('cloudModel').value = config.model;
+        document.getElementById('apiBaseUrl').value = config.baseUrl;
+        updateCloudModelOptions(config.provider);
+      }
+
+      closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+
+      cancelBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+
+      saveBtn.addEventListener('click', function() {
+        const provider = document.getElementById('apiProvider').value;
+        const apiKey = document.getElementById('apiKey').value;
+        const model = document.getElementById('cloudModel').value;
+        const baseUrl = document.getElementById('apiBaseUrl').value;
+
+        cloudAIClient.setConfig({ provider, apiKey, model, baseUrl });
+        checkAIAvailability();
+        renderApiConfigList();
+        modal.style.display = 'none';
+      });
+
+      addApiBtn.addEventListener('click', function() {
+        cloudAIClient.addConfig({
+          provider: 'openai',
+          apiKey: '',
+          model: 'gpt-4',
+          baseUrl: ''
+        });
+        loadCurrentConfig();
+        renderApiConfigList();
+      });
+
+      // 打开模态框时加载配置
+      modal.addEventListener('show', function() {
+        renderApiConfigList();
+        loadCurrentConfig();
+      });
+
+      // 打开模态框时触发
+      document.getElementById('configBtn').addEventListener('click', function() {
+        modal.style.display = 'block';
+        renderApiConfigList();
+        loadCurrentConfig();
+      });
+
+      // 监听提供商切换，动态更新模型列表
+      providerSelect.addEventListener('change', function() {
+        updateCloudModelOptions(this.value);
+      });
+
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    }
+
+    // 切换标签
+    function switchTab(tab) {
+      selectedTab = tab;
+      
+      // 更新标签按钮状态
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+      // 显示对应面板
+      document.getElementById('manualPanel').style.display = tab === 'manual' ? 'block' : 'none';
+      document.getElementById('voicePanel').style.display = tab === 'voice' ? 'block' : 'none';
+      document.getElementById('uploadPanel').style.display = tab === 'upload' ? 'block' : 'none';
+    }
+
+    // 分析内容
+    async function analyzeContent() {
+      let text = '';
+      
+      if (selectedTab === 'manual') {
+        text = document.getElementById('manualInput').value;
+      } else if (selectedTab === 'voice') {
+        text = document.getElementById('voiceTranscript').value;
+      } else if (selectedTab === 'upload') {
+        text = document.getElementById('fileList').textContent;
+      }
+
+      if (!text || !text.trim()) {
+        updateAnalysisResult('输入为空', '-', '请输入内容进行分析', []);
+        return;
+      }
+
+      setLoadingState('分析中...');
+
+      try {
+        let result, meta;
+
+        if (currentAIService === 'local') {
+          result = await ollamaClient.analyze(text, currentAIRole);
+          
+          if (ollamaClient.isAvailable) {
+            meta = `使用本地Ollama AI分析 (模型: ${ollamaClient.model}, 身份: ${getAIRoleName(currentAIRole)})`;
+          } else {
+            meta = 'Ollama服务不可用，使用备用模式';
+          }
+        } else {
+          // 清除分析过程动画
+          clearAnalysisProcess();
+          
+          // 显示初始分析状态
+          document.getElementById('analysisCategory').textContent = '分析中...';
+          document.getElementById('analysisAdvice').textContent = 'AI正在分析，请稍候...';
+          
+          // 定义流式回调函数
+          let streamingAdvice = '';
+          const onStream = (chunk, fullContent) => {
+            streamingAdvice = fullContent;
+            document.getElementById('analysisAdvice').textContent = streamingAdvice;
+          };
+          
+          result = await cloudAIClient.analyze(text, currentAIRole, onStream);
+          meta = `使用云端API分析 (${cloudAIClient.config.provider} - ${cloudAIClient.config.model}, 身份: ${getAIRoleName(currentAIRole)})`;
+        }
+        
+        updateAnalysisResult('分析完成', result.category, result.advice, result.tags, meta);
+      } catch (error) {
+        console.error('分析失败:', error);
+        updateAnalysisResult('分析失败', '-', `分析过程中出现错误: ${error.message}`, []);
+      }
+    }
+
+    // 清空输入
+    function clearInput() {
+      if (selectedTab === 'manual') {
+        document.getElementById('manualInput').value = '';
+      } else if (selectedTab === 'voice') {
+        document.getElementById('voiceTranscript').value = '';
+      } else if (selectedTab === 'upload') {
+        document.getElementById('fileList').textContent = '';
+        uploadedFiles = [];
+      }
+      updateAnalysisResult('等待输入...', '-', '', []);
+    }
+
+    // 开始语音识别
+    function startVoiceRecognition() {
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        const startBtn = document.getElementById('startVoiceBtn');
+        const transcript = document.getElementById('voiceTranscript');
+
+        startBtn.textContent = '🎤 正在聆听...';
+        startBtn.disabled = true;
+
+        recognition.onstart = () => {
+          console.log('语音识别开始');
+        };
+
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          transcript.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onerror = (event) => {
+          console.error('语音识别错误:', event.error);
+          startBtn.textContent = '🎤 开始语音输入';
+          startBtn.disabled = false;
+        };
+
+        recognition.onend = () => {
+          startBtn.textContent = '🎤 开始语音输入';
+          startBtn.disabled = false;
+        };
+
+        recognition.start();
+      } else {
+        alert('您的浏览器不支持语音识别功能');
+      }
+    }
+
+    // 处理文件选择
+    function handleFileSelect(event) {
+      handleFiles(event.target.files);
+    }
+
+    // 处理文件
+    function handleFiles(files) {
+      uploadedFiles = Array.from(files);
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+
+      uploadedFiles.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.textContent = `${file.name} (${(file.size / 1024).toFixed(2)}KB)`;
+        fileList.appendChild(fileItem);
+      });
+
+      // 读取文件内容
+      if (uploadedFiles.length > 0) {
+        Promise.all(uploadedFiles.map(readFileContent)).then(contents => {
+          const combinedContent = contents.join('\n\n');
+          fileList.textContent = combinedContent;
+        });
+      }
+    }
+
+    // 读取文件内容
+    function readFileContent(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsText(file);
+      });
+    }
+
+    // 更新分析结果
+    function updateAnalysisResult(status, category, advice, tags, meta = '') {
+      // 清除分析过程动画
+      clearAnalysisProcess();
+      
+      document.getElementById('analysisSummary').textContent = status;
+      document.getElementById('analysisCategory').textContent = category;
+      document.getElementById('analysisAdvice').textContent = advice;
+      
+      const tagsNode = document.getElementById('analysisTags');
+      tagsNode.innerHTML = (tags || []).map(tag => `<span class="tag">${tag}</span>`).join('');
+      
+      document.getElementById('analysisTimestamp').textContent = new Date().toLocaleString();
+      document.getElementById('analysisMeta').textContent = meta;
+    }
+
+    // 设置加载状态
+    function setLoadingState(text, meta = '') {
+      document.getElementById('analysisSummary').textContent = text;
+      document.getElementById('analysisCategory').textContent = '分析中...';
+      document.getElementById('analysisAdvice').textContent = '请稍候，AI正在思考...';
+      document.getElementById('analysisTags').innerHTML = '';
+      document.getElementById('analysisMeta').textContent = meta;
+      
+      // 显示分析过程
+      showAnalysisProcess();
+    }
+
+    // 显示分析过程
+    function showAnalysisProcess() {
+      const adviceElement = document.getElementById('analysisAdvice');
+      const originalText = adviceElement.textContent;
+      let dots = 0;
+      
+      const processInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        const loadingText = originalText + '.'.repeat(dots);
+        adviceElement.textContent = loadingText;
+      }, 500);
+      
+      // 保存间隔ID，以便在分析完成后清除
+      window.analysisProcessInterval = processInterval;
+    }
+
+    // 清除分析过程
+    function clearAnalysisProcess() {
+      if (window.analysisProcessInterval) {
+        clearInterval(window.analysisProcessInterval);
+        window.analysisProcessInterval = null;
+      }
+    }
+
+    // 初始化
+    init();
+  </script>
+</body>
+</html>

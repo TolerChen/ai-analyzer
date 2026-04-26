@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI身份配置 - AI Analyzer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    .nav-bar {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .config-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+
+    .role-config {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .role-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #5a6fd8;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .status-message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-success {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: #4caf50;
+    }
+
+    .status-error {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      color: #f44336;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .nav-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .role-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <div class="nav-title">AI Analyzer</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">分析工具</a>
+        <a href="config.html" class="nav-link">AI身份配置</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>AI身份配置</h1>
+      <p>自定义不同AI身份的系统提示词和分析提示词</p>
+      <div class="role-buttons" id="roleButtonsContainer" style="margin-top: 20px; justify-content: center;">
+        <button type="button" class="role-btn" data-role="analyst">分析助手</button>
+        <button type="button" class="role-btn" data-role="project_manager">项目经理</button>
+        <button type="button" class="role-btn" data-role="project_shepherd">项目牧羊人</button>
+        <button type="button" class="role-btn" data-role="coach">职场教练</button>
+        <button type="button" class="role-btn" data-role="technical">技术专家</button>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <h2 class="section-title">AI身份提示词配置</h2>
+      
+      <div class="role-config">
+        <div class="role-header">
+          <div class="role-name">分析助手</div>
+        </div>
+        <div class="form-group">
+          <label for="analyst-system">系统提示词:</label>
+          <textarea id="analyst-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="analyst-prompt">分析提示词:</label>
+          <textarea id="analyst-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+      </div>
+
+      <div class="role-config">
+        <div class="role-header">
+          <div class="role-name">项目经理</div>
+        </div>
+        <div class="form-group">
+          <label for="project_manager-system">系统提示词:</label>
+          <textarea id="project_manager-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="project_manager-prompt">分析提示词:</label>
+          <textarea id="project_manager-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+      </div>
+
+      <div class="role-config">
+        <div class="role-header">
+          <div class="role-name">项目牧羊人</div>
+        </div>
+        <div class="form-group">
+          <label for="project_shepherd-system">系统提示词:</label>
+          <textarea id="project_shepherd-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="project_shepherd-prompt">分析提示词:</label>
+          <textarea id="project_shepherd-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+      </div>
+
+      <div class="role-config">
+        <div class="role-header">
+          <div class="role-name">职场教练</div>
+        </div>
+        <div class="form-group">
+          <label for="coach-system">系统提示词:</label>
+          <textarea id="coach-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="coach-prompt">分析提示词:</label>
+          <textarea id="coach-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+      </div>
+
+      <div class="role-config">
+        <div class="role-header">
+          <div class="role-name">技术专家</div>
+        </div>
+        <div class="form-group">
+          <label for="technical-system">系统提示词:</label>
+          <textarea id="technical-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="technical-prompt">分析提示词:</label>
+          <textarea id="technical-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+      </div>
+
+      <!-- 新增AI身份表单 -->
+      <div class="role-config" style="background: rgba(0, 0, 0, 0.1); border: 2px dashed rgba(255, 255, 255, 0.3);">
+        <div class="role-header">
+          <div class="role-name">新增AI身份</div>
+        </div>
+        <div class="form-group">
+          <label for="new-role-name">身份名称:</label>
+          <input type="text" id="new-role-name" placeholder="输入身份名称" style="width: 100%; padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; background: rgba(0, 0, 0, 0.3); color: #ffffff; font-size: 1rem;">
+        </div>
+        <div class="form-group">
+          <label for="new-role-system">系统提示词:</label>
+          <textarea id="new-role-system" placeholder="输入系统提示词..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="new-role-prompt">分析提示词:</label>
+          <textarea id="new-role-prompt" placeholder="输入分析提示词..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="addRole">添加身份</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="saveConfig">保存配置</button>
+        <button class="btn btn-secondary" id="resetConfig">重置默认</button>
+      </div>
+
+      <div class="status-message" id="statusMessage"></div>
+    </div>
+  </div>
+
+  <script>
+    // AI身份对应的默认提示词模板
+    const defaultRolePrompts = {
+      analyst: {
+        system: '你是一个专业的智能分析助手，专门用于分析会议内容、待办事项、风险问题等。你的分析需要客观、全面、准确。',
+        prompt: '分析以下内容，判断其类型并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      project_manager: {
+        system: '你是一位经验丰富的项目经理，擅长分析项目相关内容，提供专业的项目管理建议和风险评估。',
+        prompt: '作为项目经理，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      project_shepherd: {
+        system: '你是一位专业的项目牧羊人，擅长追踪项目进展，监控项目状态，确保项目按时交付。',
+        prompt: '作为项目牧羊人，分析以下内容并提供关于项目进展追踪的专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      coach: {
+        system: '你是一位专业的职场教练，擅长分析职场相关内容，提供个人发展和职业规划建议。',
+        prompt: '作为职场教练，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      },
+      technical: {
+        system: '你是一位技术专家，擅长分析技术相关内容，提供专业的技术解决方案和建议。',
+        prompt: '作为技术专家，分析以下内容并提供专业建议：\n\n${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}'
+      }
+    };
+
+    // 初始化
+    function init() {
+      loadConfig();
+      loadCustomRoles();
+      loadCustomRoleButtons();
+      setupRoleButtonListeners();
+      setupEventListeners();
+      
+      // 设置默认选中的AI身份
+      document.querySelector('.role-btn[data-role="analyst"]').click();
+    }
+
+    // 加载自定义身份
+    function loadCustomRoles() {
+      const customRoles = localStorage.getItem('customRoles');
+      const configSection = document.querySelector('.config-section');
+      const addRoleForm = document.querySelector('.role-config[style*="dashed"]');
+      
+      // 清除现有的自定义身份配置区域
+      const existingCustomRoles = configSection.querySelectorAll('.role-config:not([style*="dashed"])');
+      existingCustomRoles.forEach(roleConfig => {
+        // 只删除非默认身份的配置区域
+        const roleName = roleConfig.querySelector('.role-name').textContent;
+        const defaultRoleNames = ['分析助手', '项目经理', '项目牧羊人', '职场教练', '技术专家'];
+        if (!defaultRoleNames.includes(roleName)) {
+          roleConfig.remove();
+        }
+      });
+      
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        
+        Object.entries(customRolesObj).forEach(([roleId, roleName]) => {
+          // 创建自定义身份配置区域
+          const roleConfig = document.createElement('div');
+          roleConfig.className = 'role-config';
+          roleConfig.innerHTML = `
+            <div class="role-header">
+              <div class="role-name">${roleName}</div>
+              <button class="btn btn-secondary" onclick="deleteRole('${roleId}')" style="font-size: 0.8rem; padding: 4px 8px;">删除</button>
+            </div>
+            <div class="form-group">
+              <label for="${roleId}-system">系统提示词:</label>
+              <textarea id="${roleId}-system" placeholder="输入系统提示词..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="${roleId}-prompt">分析提示词:</label>
+              <textarea id="${roleId}-prompt" placeholder="输入分析提示词..."></textarea>
+            </div>
+          `;
+          
+          // 插入到添加身份表单之前
+          configSection.insertBefore(roleConfig, addRoleForm);
+        });
+      }
+    }
+
+    // 加载自定义AI身份按钮
+    function loadCustomRoleButtons() {
+      const customRoles = localStorage.getItem('customRoles');
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        const container = document.getElementById('roleButtonsContainer');
+        
+        Object.entries(customRolesObj).forEach(([roleId, roleName]) => {
+          // 检查按钮是否已存在
+          if (!document.querySelector(`.role-btn[data-role="${roleId}"]`)) {
+            // 创建按钮
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'role-btn';
+            button.dataset.role = roleId;
+            button.textContent = roleName;
+            
+            // 添加到容器
+            container.appendChild(button);
+          }
+        });
+      }
+    }
+
+    // 为所有角色按钮添加事件监听器
+    function setupRoleButtonListeners() {
+      document.querySelectorAll('.role-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          // 移除所有按钮的选中状态
+          document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.style.background = 'rgba(0, 0, 0, 0.3)';
+            btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+          });
+          
+          // 设置当前按钮为选中状态
+          this.style.background = 'rgba(102, 126, 234, 0.5)';
+          this.style.border = '1px solid #667eea';
+        });
+      });
+    }
+
+    // 删除身份
+    function deleteRole(roleId) {
+      if (confirm('确定要删除这个身份吗？')) {
+        // 从自定义身份列表中删除
+        let customRoles = localStorage.getItem('customRoles');
+        if (customRoles) {
+          customRoles = JSON.parse(customRoles);
+          delete customRoles[roleId];
+          localStorage.setItem('customRoles', JSON.stringify(customRoles));
+        }
+        
+        // 从提示词配置中删除
+        let customPrompts = localStorage.getItem('customRolePrompts');
+        if (customPrompts) {
+          customPrompts = JSON.parse(customPrompts);
+          delete customPrompts[roleId];
+          localStorage.setItem('customRolePrompts', JSON.stringify(customPrompts));
+        }
+        
+        // 重新加载自定义身份
+        loadCustomRoles();
+        // 重新加载自定义身份按钮
+        loadCustomRoleButtons();
+        // 重新设置事件监听器
+        setupRoleButtonListeners();
+        // 显示成功提示
+        showStatus('身份删除成功！', 'success');
+      }
+    }
+
+    // 加载配置
+    function loadConfig() {
+      const savedConfig = localStorage.getItem('customRolePrompts');
+      const prompts = savedConfig ? JSON.parse(savedConfig) : defaultRolePrompts;
+
+      // 加载默认身份配置
+      Object.keys(defaultRolePrompts).forEach(role => {
+        const systemElement = document.getElementById(`${role}-system`);
+        const promptElement = document.getElementById(`${role}-prompt`);
+        
+        if (systemElement) {
+          systemElement.value = prompts[role] ? prompts[role].system : defaultRolePrompts[role].system;
+        }
+        if (promptElement) {
+          promptElement.value = prompts[role] ? prompts[role].prompt : defaultRolePrompts[role].prompt;
+        }
+      });
+
+      // 加载自定义身份配置
+      const customRoles = localStorage.getItem('customRoles');
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        Object.keys(customRolesObj).forEach(role => {
+          const systemElement = document.getElementById(`${role}-system`);
+          const promptElement = document.getElementById(`${role}-prompt`);
+          
+          if (systemElement) {
+            systemElement.value = prompts[role] ? prompts[role].system : `你是一位专业的${customRolesObj[role]}，擅长分析相关内容并提供专业建议。`;
+          }
+          if (promptElement) {
+            promptElement.value = prompts[role] ? prompts[role].prompt : `作为${customRolesObj[role]}，分析以下内容并提供专业建议：\n\n\${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}`;
+          }
+        });
+      }
+    }
+
+    // 保存配置
+    function saveConfig() {
+      const config = {};
+      
+      // 保存默认身份
+      Object.keys(defaultRolePrompts).forEach(role => {
+        const systemElement = document.getElementById(`${role}-system`);
+        const promptElement = document.getElementById(`${role}-prompt`);
+        
+        if (systemElement && promptElement) {
+          config[role] = {
+            system: systemElement.value,
+            prompt: promptElement.value
+          };
+        }
+      });
+
+      // 保存自定义身份
+      const customRoles = localStorage.getItem('customRoles');
+      if (customRoles) {
+        const customRolesObj = JSON.parse(customRoles);
+        Object.keys(customRolesObj).forEach(role => {
+          const systemElement = document.getElementById(`${role}-system`);
+          const promptElement = document.getElementById(`${role}-prompt`);
+          
+          if (systemElement && promptElement) {
+            config[role] = {
+              system: systemElement.value,
+              prompt: promptElement.value
+            };
+          }
+        });
+      }
+
+      localStorage.setItem('customRolePrompts', JSON.stringify(config));
+      showStatus('配置保存成功！', 'success');
+    }
+
+    // 添加新身份
+    function addRole() {
+      const roleName = document.getElementById('new-role-name').value.trim();
+      const systemPrompt = document.getElementById('new-role-system').value.trim();
+      const analysisPrompt = document.getElementById('new-role-prompt').value.trim();
+
+      if (!roleName) {
+        showStatus('请输入身份名称！', 'error');
+        return;
+      }
+
+      // 生成唯一标识符
+      const roleId = roleName.toLowerCase().replace(/\s+/g, '_');
+
+      // 检查是否已存在
+      const savedConfig = localStorage.getItem('customRolePrompts');
+      const currentPrompts = savedConfig ? JSON.parse(savedConfig) : {};
+      
+      if (currentPrompts[roleId]) {
+        showStatus('该身份已存在！', 'error');
+        return;
+      }
+
+      // 保存自定义身份信息
+      let customRoles = localStorage.getItem('customRoles');
+      customRoles = customRoles ? JSON.parse(customRoles) : {};
+      customRoles[roleId] = roleName;
+      localStorage.setItem('customRoles', JSON.stringify(customRoles));
+
+      // 添加到当前配置
+      currentPrompts[roleId] = {
+        system: systemPrompt || `你是一位专业的${roleName}，擅长分析相关内容并提供专业建议。`,
+        prompt: analysisPrompt || `作为${roleName}，分析以下内容并提供专业建议：\n\n\${text}\n\n请严格按照以下JSON格式返回：\n{"category": "会议纪要|待办事项|交付物/输出|风险提示|附件/资料", "advice": "建议内容", "tags": ["标签1", "标签2"]}`
+      };
+
+      localStorage.setItem('customRolePrompts', JSON.stringify(currentPrompts));
+
+      // 清空表单
+      document.getElementById('new-role-name').value = '';
+      document.getElementById('new-role-system').value = '';
+      document.getElementById('new-role-prompt').value = '';
+      
+      // 重新加载自定义身份
+      loadCustomRoles();
+      // 重新加载自定义身份按钮
+      loadCustomRoleButtons();
+      // 重新设置事件监听器
+      setupRoleButtonListeners();
+      // 重新加载配置
+      loadConfig();
+      
+      // 显示成功提示
+      setTimeout(() => {
+        showStatus('身份添加成功！', 'success');
+      }, 100);
+    }
+
+    // 重置默认配置
+    function resetConfig() {
+      localStorage.removeItem('customRolePrompts');
+      loadConfig();
+      showStatus('已重置为默认配置！', 'success');
+    }
+
+    // 显示状态消息
+    function showStatus(message, type) {
+      const statusElement = document.getElementById('statusMessage');
+      statusElement.textContent = message;
+      statusElement.className = `status-message status-${type}`;
+      statusElement.style.display = 'block';
+
+      setTimeout(() => {
+        statusElement.style.display = 'none';
+      }, 3000);
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      document.getElementById('saveConfig').addEventListener('click', saveConfig);
+      document.getElementById('resetConfig').addEventListener('click', resetConfig);
+      document.getElementById('addRole').addEventListener('click', addRole);
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

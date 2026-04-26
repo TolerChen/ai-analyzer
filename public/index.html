@@ -1,0 +1,3258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Analyzer - 智能分析工具</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --success: #10b981;
+      --success-light: #34d399;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --bg-card-hover: #22222e;
+      --bg-input: #0f0f14;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #2a2a3a;
+      --border-light: #3a3a4a;
+      --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+      --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+.container { 
+      max-width: 1440px; 
+      margin: 0 auto; 
+      padding: 40px 24px; 
+      position: relative; 
+      z-index: 1;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding: 0;
+      margin: 0;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding: 60px 0;
+      position: relative;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      z-index: -1;
+    }
+
+    .header-icon {
+      width: 100px;
+      height: 100px;
+      background: var(--gradient-primary);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      font-size: 48px;
+      box-shadow: var(--shadow-xl), var(--shadow-glow);
+      animation: float 4s ease-in-out infinite, glow 3s ease-in-out infinite alternate, light-on 4s ease-in-out infinite alternate;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .header-icon:hover {
+      opacity: 1;
+      filter: brightness(1.3) saturate(1.2);
+      box-shadow: var(--shadow-xl), 0 0 60px rgba(99, 102, 241, 0.8), 0 0 100px rgba(99, 102, 241, 0.4);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+    }
+
+    @keyframes glow {
+      0% { box-shadow: var(--shadow-xl), 0 0 30px rgba(99, 102, 241, 0.3); }
+      100% { box-shadow: var(--shadow-xl), 0 0 50px rgba(99, 102, 241, 0.5); }
+    }
+
+    @keyframes light-on {
+      0% {
+        opacity: 0.6;
+        filter: brightness(0.7) saturate(0.6);
+        box-shadow: var(--shadow-xl), 0 0 20px rgba(99, 102, 241, 0.2);
+      }
+      100% {
+        opacity: 1;
+        filter: brightness(1.4) saturate(1.3);
+        box-shadow: var(--shadow-xl), 0 0 60px rgba(99, 102, 241, 0.8), 0 0 100px rgba(99, 102, 241, 0.4);
+      }
+    }
+
+    .header h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+      animation: header-text-animation 4s ease-in-out infinite alternate;
+      position: relative;
+      display: inline-block;
+      transition: all var(--transition-normal);
+    }
+
+    .header h1:hover {
+      opacity: 1;
+      filter: brightness(1.5) saturate(1.4) drop-shadow(0 0 50px rgba(99, 102, 241, 1));
+      text-shadow: 0 0 30px rgba(99, 102, 241, 1), 0 0 60px rgba(99, 102, 241, 0.6);
+    }
+
+    @keyframes header-text-animation {
+      0% {
+        opacity: 0.7;
+        filter: brightness(0.7) saturate(0.7) drop-shadow(0 0 15px rgba(99, 102, 241, 0.2));
+        text-shadow: 0 0 5px rgba(99, 102, 241, 0.2), 0 0 10px rgba(99, 102, 241, 0.1);
+      }
+      100% {
+        opacity: 1;
+        filter: brightness(1.3) saturate(1.3) drop-shadow(0 0 40px rgba(99, 102, 241, 0.8));
+        text-shadow: 0 0 30px rgba(99, 102, 241, 1), 0 0 60px rgba(99, 102, 241, 0.6);
+      }
+    }
+
+    .header p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 32px;
+      align-items: stretch;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .result-card {
+      flex: 1;
+      min-height: 600px;
+    }
+
+    @media (max-width: 1200px) { 
+      .main-content { 
+        grid-template-columns: 1fr; 
+      }
+      .left-column, .right-column {
+        min-height: auto;
+      }
+      .result-card {
+        min-height: 400px;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: var(--transition-normal);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+
+    .card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* AI服务与模型管理样式 */
+    .ai-service-manager {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-service-manager::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.05), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* AI服务选择部分 */
+    .ai-service-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: var(--transition-normal);
+      position: relative;
+      z-index: 1;
+    }
+
+    .ai-service-section:hover {
+      background: rgba(99, 102, 241, 0.03);
+      border-radius: var(--radius-sm);
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .ai-service-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-service-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .ai-service-text {
+      flex: 1;
+    }
+
+    .ai-service-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .ai-service-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .ai-service-arrow {
+      color: var(--text-secondary);
+      transition: var(--transition-fast);
+    }
+
+    .ai-service-section:hover .ai-service-arrow {
+      transform: translateX(4px);
+      color: var(--primary);
+    }
+
+    /* AI状态指示灯样式 */
+    .ai-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-status-light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+      animation: breathe 2s ease-in-out infinite;
+    }
+
+    .ai-status-light.off {
+      background: #f87171;
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+      animation: none;
+    }
+
+    .ai-status-light.warning {
+      background: #fbbf24;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+      animation: breathe 1s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% {
+        opacity: 0.6;
+        transform: scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    /* 已加载模型显示部分 */
+    .loaded-models-section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .loaded-models-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .loaded-models-icon {
+      font-size: 20px;
+    }
+
+    .loaded-models-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .loaded-models-count {
+      background: var(--gradient-primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+    }
+
+    .loaded-models-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .loaded-model-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      transition: var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .loaded-model-tag:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+    }
+
+    .loaded-model-tag.active {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .loaded-model-icon {
+      font-size: 14px;
+    }
+
+    .loaded-model-name {
+      font-weight: 500;
+    }
+
+    .no-models-message {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* AI服务子页面样式 */
+    .ai-service-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .ai-service-modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-service-modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: var(--shadow-xl), 0 0 60px rgba(99, 102, 241, 0.2);
+    }
+
+    .ai-service-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ai-service-modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-service-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition-fast);
+    }
+
+    .ai-service-modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    .ai-service-modal-body {
+      padding: 24px;
+    }
+
+    /* 模型选择增强样式 */
+    .model-select-section {
+      margin-top: 24px;
+    }
+
+    .model-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .model-card {
+      background: var(--bg-card-hover);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .model-card:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .model-card.active {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .model-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+      transition: left 0.3s ease;
+    }
+
+    .model-card:hover::before {
+      left: 100%;
+    }
+
+    .model-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .model-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+
+    .model-description {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .model-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .model-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 100px;
+      color: var(--primary-light);
+    }
+
+    .auto-config-section {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: var(--radius-md);
+    }
+
+    .auto-config-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--success);
+      margin-bottom: 12px;
+    }
+
+    .auto-config-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .auto-config-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .auto-config-step-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--bg-card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--primary);
+    }
+
+    .auto-config-step.completed .auto-config-step-icon {
+      background: var(--success);
+      color: white;
+    }
+
+    .auto-config-step.active .auto-config-step-icon {
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .card-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-title-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-body { padding: 28px; }
+
+    .ai-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 100px;
+      color: var(--success);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .ai-status.offline {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--error);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    .service-toggle {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-input);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .service-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+      transition: var(--transition-normal);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .service-btn:hover::before {
+      left: 100%;
+    }
+
+    .service-btn:hover { color: var(--text-primary); background: rgba(99, 102, 241, 0.1); }
+
+    .service-btn.active {
+      background: var(--gradient-primary);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .config-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .config-btn {
+      padding: 12px 22px;
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .config-btn:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .config-info {
+      flex: 1;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      padding: 20px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 1rem;
+      resize: vertical;
+      font-family: inherit;
+      transition: var(--transition-fast);
+      line-height: 1.7;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), var(--shadow-md);
+    }
+
+    textarea::placeholder { color: var(--text-muted); }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      background: var(--bg-input);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+      opacity: 0;
+      transition: var(--transition-normal);
+    }
+
+    .upload-area:hover::before { opacity: 1; }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .upload-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--gradient-primary);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .voice-section { text-align: center; padding: 50px 30px; }
+
+    .voice-btn {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      border: none;
+      color: #fff;
+      font-size: 48px;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .voice-btn:hover { transform: scale(1.1); box-shadow: var(--shadow-xl), 0 0 50px rgba(99, 102, 241, 0.5); }
+
+    .voice-btn.recording {
+      animation: recording-pulse 1s ease-in-out infinite;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    @keyframes recording-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    }
+
+    .voice-hint { color: var(--text-secondary); font-size: 1rem; }
+
+    .role-section { margin-top: 28px; }
+
+    .role-label {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .role-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .role-btn {
+      padding: 12px 22px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+      transition: var(--transition-normal);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .role-btn:hover::before {
+      left: 100%;
+    }
+
+    .role-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-primary);
+      background: rgba(99, 102, 241, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .role-btn.active {
+      background: var(--gradient-primary);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: var(--shadow-md), 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .add-role-btn {
+      padding: 12px 22px;
+      background: transparent;
+      border: 2px dashed var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-role-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+      transition: var(--transition-normal);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .add-role-btn:hover::before {
+      left: 100%;
+    }
+
+    .add-role-btn:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .role-section { margin-top: 20px; }
+
+    .controls { display: flex; gap: 14px; margin-top: 28px; }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: var(--transition-normal);
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: #fff;
+      box-shadow: var(--shadow-md), 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:active { transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .controls .btn { flex: 1; padding: 16px 28px; }
+
+    /* 全局选择块悬停效果 */
+    .form-select:hover,
+    .form-input:hover,
+    .form-textarea:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: var(--transition-normal);
+      position: sticky;
+      top: 24px;
+    }
+
+    .result-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .result-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, transparent 100%);
+    }
+
+    .result-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .result-meta { color: var(--text-secondary); font-size: 0.9rem; }
+
+    .result-body { padding: 28px; }
+
+    .result-item { margin-bottom: 24px; }
+
+    .result-item:last-child { margin-bottom: 0; }
+
+    .result-label {
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--primary-light);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .result-label-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .result-value {
+      line-height: 1.8;
+      color: var(--text-primary);
+      padding: 20px;
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      min-height: 80px;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .tag {
+      padding: 10px 18px;
+      background: var(--gradient-primary);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      animation: tag-appear 0.4s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @keyframes tag-appear {
+      from { opacity: 0; transform: scale(0.7) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .result-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 28px 0;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 15, 0.9);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-normal);
+      padding: 24px;
+    }
+
+    .modal.active { opacity: 1; visibility: visible; }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow: hidden;
+      transform: scale(0.9) translateY(20px);
+      transition: var(--transition-normal);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xl), 0 0 60px rgba(99, 102, 241, 0.2);
+    }
+
+    .modal.active .modal-content { transform: scale(1) translateY(0); }
+
+    .modal-header {
+      padding: 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, transparent 100%);
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-close {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--error);
+      cursor: pointer;
+      font-size: 24px;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover { background: rgba(239, 68, 68, 0.2); transform: rotate(90deg); }
+
+    .modal-body { padding: 28px; max-height: 60vh; overflow-y: auto; }
+
+    .modal-footer {
+      padding: 24px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 14px;
+      background: var(--bg-input);
+    }
+
+    .form-group { margin-bottom: 24px; }
+
+    .form-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: var(--transition-fast);
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 20px;
+      padding-right: 44px;
+    }
+
+    .form-select:hover {
+      border-color: var(--primary-light);
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+
+    /* 为选择块添加闪烁效果 */
+    .form-select,
+    .form-input,
+    .form-textarea {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-select::before,
+    .form-input::before,
+    .form-textarea::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+      transition: var(--transition-normal);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .form-select:hover::before,
+    .form-input:hover::before,
+    .form-textarea:hover::before {
+      left: 100%;
+    }
+
+    /* 优化下拉菜单选项样式 */
+    select.form-select option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      margin: 2px 0;
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+    }
+
+    select.form-select option:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    select.form-select option:checked {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: var(--transition-fast);
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+
+    .api-config-list {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 16px;
+      background: var(--bg-input);
+    }
+
+    .api-config-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      background: var(--bg-card);
+      transition: var(--transition-fast);
+    }
+
+    .api-config-item:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+    .api-config-item:last-child { margin-bottom: 0; }
+
+    .api-config-info { flex: 1; }
+
+    .api-config-name { font-weight: 700; margin-bottom: 6px; color: var(--text-primary); }
+
+    .api-config-detail { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .api-config-actions { display: flex; gap: 10px; }
+
+    .btn-sm { padding: 10px 18px; font-size: 0.9rem; }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      padding: 18px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 500;
+      z-index: 9999;
+      transform: translateX(150%);
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 280px;
+    }
+
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-color: var(--success); background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); }
+    .toast.error { border-color: var(--error); background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); }
+
+    .toast-icon { font-size: 1.5rem; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      animation: file-appear 0.3s ease;
+    }
+
+    @keyframes file-appear {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .file-item:last-child { margin-bottom: 0; }
+
+    .file-icon {
+      width: 46px;
+      height: 46px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .file-info { flex: 1; }
+
+    .file-name { font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+
+    .file-size { font-size: 0.85rem; color: var(--text-secondary); }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    .analysis-thinking {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-input);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      margin-top: 12px;
+    }
+
+    .thinking-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .thinking-dots span {
+      width: 10px;
+      height: 10px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: thinking 1.4s ease-in-out infinite;
+    }
+
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes thinking {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .stream-content {
+      animation: fadeInUp 0.3s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--bg-input);
+      padding: 8px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tab-button:hover { color: var(--text-primary); background: rgba(99, 102, 241, 0.1); }
+
+    .tab-button.active {
+      background: var(--gradient-primary);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-icon">🤖</div>
+      <h1>AI Analyzer</h1>
+      <p>智能分析工具 - 支持多种AI服务，快速准确地分析您的文本内容</p>
+    </div>
+
+    <div class="main-content">
+      <div class="left-column">
+        <!-- AI服务与模型管理 -->
+        <div class="ai-service-manager" id="aiServiceManager">
+          <!-- AI服务选择部分 -->
+          <div class="ai-service-section">
+            <div class="ai-service-info">
+              <div class="ai-service-icon">🎯</div>
+              <div class="ai-service-text">
+                <div class="ai-service-title">AI服务选择</div>
+                <div class="ai-service-subtitle" id="currentServiceInfo">云端API - 未配置</div>
+              </div>
+              <div class="ai-status-indicator" id="aiStatusIndicator">
+                <div class="ai-status-light" id="aiStatusLight"></div>
+              </div>
+            </div>
+            <div class="ai-service-arrow">→</div>
+          </div>
+          
+          <!-- 已加载模型显示部分 -->
+          <div class="loaded-models-section">
+            <div class="loaded-models-header">
+              <span class="loaded-models-icon">📦</span>
+              <span class="loaded-models-title">已加载模型</span>
+              <span class="loaded-models-count" id="loadedModelsCount">0</span>
+            </div>
+            <div class="loaded-models-list" id="loadedModelsList"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">📝</div>
+              输入内容
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="input-tabs">
+              <button class="tab-button active" data-tab="manual">
+                <span>⌨️</span> 手动输入
+              </button>
+              <button class="tab-button" data-tab="voice">
+                <span>🎤</span> 语音输入
+              </button>
+              <button class="tab-button" data-tab="upload">
+                <span>📁</span> 文件上传
+              </button>
+            </div>
+
+            <div class="input-panel" id="manualPanel">
+              <textarea id="manualInput" placeholder="请输入会议内容、待办事项、风险问题或交付物说明..."></textarea>
+            </div>
+
+            <div class="input-panel" id="voicePanel" style="display: none;">
+              <div class="voice-section">
+                <button class="voice-btn" id="startVoiceBtn">🎤</button>
+                <p class="voice-hint">点击按钮开始语音输入</p>
+                <textarea id="voiceTranscript" placeholder="语音识别结果将显示在这里..." style="margin-top: 20px; height: 120px;"></textarea>
+              </div>
+            </div>
+
+            <div class="input-panel" id="uploadPanel" style="display: none;">
+              <div class="upload-area" id="uploadDropZone">
+                <input type="file" id="fileInput" style="display: none;" accept=".txt,.md,.js,.py,.json,.csv,.log" multiple>
+                <div class="upload-icon">📁</div>
+                <div style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">点击或拖拽文件到此处上传</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary);">支持 .txt, .md, .js, .py, .json, .csv, .log 格式</div>
+                <div id="fileList"></div>
+              </div>
+            </div>
+
+            <div class="role-section">
+              <div class="role-label">选择AI身份：</div>
+              <div class="role-buttons" id="roleButtonsContainer">
+                <button type="button" class="role-btn active" data-role="analyst">🎯 分析助手</button>
+                <button type="button" class="role-btn" data-role="project_manager">📊 项目经理</button>
+                <button type="button" class="role-btn" data-role="project_shepherd">🐑 项目牧羊人</button>
+                <button type="button" class="role-btn" data-role="coach">💪 职场教练</button>
+                <button type="button" class="role-btn" data-role="technical">🔧 技术专家</button>
+              </div>
+              <button type="button" class="add-role-btn" id="addRoleBtn">➕ 新增身份</button>
+            </div>
+
+            <div class="controls">
+              <button class="btn btn-primary" id="analyzeBtn">
+                <span>🚀</span> AI智能分析
+              </button>
+              <button class="btn btn-secondary" id="clearBtn">
+                <span>🗑️</span> 清空
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="result-card">
+          <div class="result-header">
+            <div class="result-title">
+              <span>📊</span> AI智能分析结果
+            </div>
+            <span class="result-meta" id="analysisTimestamp"></span>
+          </div>
+          <div class="result-body">
+            <div class="result-item">
+              <div class="result-label">
+                <div class="result-label-icon">📌</div>
+                分析类别
+              </div>
+              <div class="result-value" id="analysisCategory">等待输入...</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">
+                <div class="result-label-icon">💡</div>
+                分析建议
+              </div>
+              <div class="result-value" id="analysisAdvice">请输入内容后点击"AI智能分析"按钮开始分析</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">
+                <div class="result-label-icon">🏷️</div>
+                相关标签
+              </div>
+              <div class="tags" id="analysisTags"></div>
+            </div>
+            <div class="result-item" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+              <div class="result-meta" id="analysisMeta" style="text-align: center;">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI服务配置模态框 -->
+    <div class="ai-service-modal" id="aiServiceModal">
+      <div class="ai-service-modal-content">
+        <div class="ai-service-modal-header">
+          <div class="ai-service-modal-title">
+            <span>🎯</span> AI服务配置
+          </div>
+          <button class="ai-service-modal-close" id="closeAiServiceModal">&times;</button>
+        </div>
+        <div class="ai-service-modal-body">
+          <div class="service-toggle">
+            <button class="service-btn active" data-service="cloud">
+              <span>☁️</span> 云端API
+            </button>
+            <button class="service-btn" data-service="local">
+              <span>💻</span> 本地Ollama
+            </button>
+          </div>
+          
+          <!-- 模型选择区域 -->
+          <div class="model-select-section" id="modelSelectSection" style="margin-top: 20px; display: none;">
+            <div class="form-group">
+              <label class="form-label">Ollama模型：</label>
+              
+              <!-- 模型卡片列表 -->
+              <div class="model-list" id="modelList"></div>
+              
+              <!-- 传统下拉选择 -->
+              <div style="margin-top: 16px;">
+                <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; display: block;">
+                  或从下拉列表选择：
+                </label>
+                <select id="ollamaModelSelect" class="form-select">
+                  <option value="qwen3:8b">qwen3:8b (qwen3)</option>
+                  <option value="llama3:8b">llama3:8b (llama3)</option>
+                  <option value="gemma2:9b">gemma2:9b (gemma)</option>
+                  <option value="mistral:7b">mistral:7b (mistral)</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- 自动配置功能 -->
+            <div class="auto-config-section" id="autoConfigSection" style="display: none;">
+              <div class="auto-config-title">
+                <span>🤖</span> 自动配置进行中
+              </div>
+              <ul class="auto-config-steps" id="autoConfigSteps">
+                <li class="auto-config-step" id="step1">
+                  <div class="auto-config-step-icon">1</div>
+                  <span>检查Ollama连接</span>
+                </li>
+                <li class="auto-config-step" id="step2">
+                  <div class="auto-config-step-icon">2</div>
+                  <span>获取可用模型列表</span>
+                </li>
+                <li class="auto-config-step" id="step3">
+                  <div class="auto-config-step-icon">3</div>
+                  <span>选择最优模型</span>
+                </li>
+                <li class="auto-config-step" id="step4">
+                  <div class="auto-config-step-icon">4</div>
+                  <span>完成配置</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="model-info" id="modelInfo" style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+              点击"刷新模型列表"获取可用的Ollama模型，或使用"自动配置"快速设置
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+              <button class="btn btn-secondary" id="refreshModelsBtn" style="flex: 1;">
+                <span>🔄</span> 刷新模型列表
+              </button>
+              <button class="btn btn-primary" id="autoConfigBtn" style="flex: 1;">
+                <span>✨</span> 自动配置
+              </button>
+            </div>
+          </div>
+          
+          <div class="config-row">
+            <button class="config-btn" id="openConfigModal">
+              <span>⚙️</span> API配置
+            </button>
+            <div id="currentConfigInfo" style="color: var(--text-secondary); font-size: 0.9rem; flex: 1;">
+              未配置API
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="addRoleModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>👤</span> 新增AI身份
+        </div>
+        <button class="modal-close" id="closeRoleModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">身份名称：</label>
+          <input type="text" id="newRoleName" class="form-input" placeholder="请输入身份名称">
+        </div>
+        <div class="form-group">
+          <label class="form-label">系统提示词：</label>
+          <textarea id="newRoleSystemPrompt" class="form-textarea" rows="3" placeholder="定义AI身份的角色和特点"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">分析提示词：</label>
+          <textarea id="newRoleAnalysisPrompt" class="form-textarea" rows="4" placeholder="定义AI分析时的提示词模板，使用${text}表示待分析内容"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelAddRole">取消</button>
+        <button class="btn btn-primary" id="saveNewRole">保存身份</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cloudConfigModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>☁️</span> 云端API配置
+        </div>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">API接口列表：</label>
+          <button class="btn btn-primary btn-sm" id="addApiConfig" style="margin-bottom: 12px; width: 100%;">
+            <span>+</span> 添加新接口
+          </button>
+          <div class="api-config-list" id="apiConfigList"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">API提供商：</label>
+          <select id="apiProvider" class="form-select">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="azure">Azure OpenAI</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="zhipu">智谱AI (GLM)</option>
+            <option value="moonshot">Moonshot (月之暗面)</option>
+            <option value="qwen-api">通义千问 (Qwen)</option>
+            <option value="custom">自定义API</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">API密钥：</label>
+          <input type="password" id="apiKey" class="form-input" placeholder="请输入API密钥">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">模型：</label>
+          
+          <!-- 模型卡片列表 -->
+          <div class="model-list" id="cloudModelList"></div>
+          
+          <!-- 传统下拉选择 -->
+          <div style="margin-top: 16px;">
+            <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; display: block;">
+              或从下拉列表选择：
+            </label>
+            <select id="cloudModel" class="form-select">
+              <option value="gpt-4">GPT-4</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+              <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
+              <option value="deepseek-chat">DeepSeek-V3</option>
+              <option value="deepseek-reasoner">DeepSeek-R1</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">API基础URL (可选)：</label>
+          <input type="text" id="apiBaseUrl" class="form-input" placeholder="例如: https://api.openai.com/v1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelCloudConfig">取消</button>
+        <button class="btn btn-primary" id="saveCloudConfig">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-message"></span>
+  </div>
+
+  <script>
+    let currentAIService = 'cloud';
+    let currentAIRole = 'analyst';
+    let selectedTab = 'manual';
+    let uploadedFiles = [];
+    let cloudAIClient, ollamaClient;
+
+    function init() {
+      cloudAIClient = new CloudAIClient();
+      cloudAIClient.loadConfig();
+      ollamaClient = new OllamaClient();
+      setupEventListeners();
+      
+      // 初始化模型选择
+      const modelSelect = document.getElementById('ollamaModelSelect');
+      if (modelSelect) {
+        modelSelect.value = ollamaClient.model || 'qwen3:8b';
+      }
+      
+      // 初始化服务选择状态
+      const modelSelectSection = document.getElementById('modelSelectSection');
+      if (modelSelectSection) {
+        modelSelectSection.style.display = currentAIService === 'local' ? 'block' : 'none';
+      }
+      
+      // 初始化渲染模型卡片（仅在元素存在时）
+      try {
+        const modelList = document.getElementById('modelList');
+        const cloudModelList = document.getElementById('cloudModelList');
+        
+        if (modelList) {
+          renderLocalModelCards([]);
+        }
+        
+        if (cloudModelList) {
+          if (cloudAIClient.config) {
+            renderCloudModelCards(cloudAIClient.config.provider || 'openai');
+          } else {
+            renderCloudModelCards('openai');
+          }
+        }
+      } catch (error) {
+        console.log('初始化模型卡片时出错:', error);
+      }
+      
+      // 初始化已加载模型显示
+      initLoadedModelsDisplay();
+      
+      checkAIAvailability();
+      loadCustomRoles();
+      updateCurrentServiceInfo();
+    }
+
+    // 初始化已加载模型显示区域
+    function initLoadedModelsDisplay() {
+      if (currentAIService === 'cloud') {
+        // 云端API显示云端模型
+        displayModelsAsTags([{
+          name: cloudAIClient.config?.model || 'gpt-4',
+          provider: cloudAIClient.config?.provider || 'openai'
+        }]);
+      } else {
+        // 本地Ollama获取模型列表
+        fetchAndDisplayLocalModels();
+      }
+    }
+
+    // 获取并显示本地模型
+    async function fetchAndDisplayLocalModels() {
+      try {
+        const models = await ollamaClient.getModels();
+        if (models && models.length > 0) {
+          displayModelsAsTags(models);
+        } else {
+          displayNoModels();
+        }
+      } catch (error) {
+        console.log('获取模型列表失败:', error);
+        displayNoModels();
+      }
+    }
+
+    // 显示模型标签列表
+    function displayModelsAsTags(models) {
+      const list = document.getElementById('loadedModelsList');
+      const count = document.getElementById('loadedModelsCount');
+      
+      if (!list) return;
+      
+      list.innerHTML = '';
+      
+      if (models.length === 0) {
+        displayNoModels();
+        return;
+      }
+      
+      if (count) {
+        count.textContent = models.length;
+      }
+      
+      models.forEach(model => {
+        const modelInfo = modelDatabase[model.name] || {
+          name: model.name,
+          icon: '📦',
+          description: 'Ollama模型',
+          tags: ['本地']
+        };
+        
+        const tag = document.createElement('div');
+        tag.className = 'loaded-model-tag';
+        if (ollamaClient && model.name === ollamaClient.model) {
+          tag.classList.add('active');
+        }
+        
+        tag.innerHTML = `
+          <span class="loaded-model-icon">${modelInfo.icon}</span>
+          <span class="loaded-model-name">${modelInfo.name}</span>
+        `;
+        
+        tag.addEventListener('click', function() {
+          if (currentAIService === 'local') {
+            document.querySelectorAll('.loaded-model-tag').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            ollamaClient.setModel(model.name);
+            const select = document.getElementById('ollamaModelSelect');
+            if (select) select.value = model.name;
+            checkAIAvailability();
+            updateCurrentServiceInfo();
+            showToast(`已切换到模型: ${modelInfo.name}`, 'success');
+          }
+        });
+        
+        list.appendChild(tag);
+      });
+    }
+
+    // 显示无模型消息
+    function displayNoModels() {
+      const list = document.getElementById('loadedModelsList');
+      const count = document.getElementById('loadedModelsCount');
+      
+      if (!list) return;
+      
+      if (count) {
+        count.textContent = '0';
+      }
+      
+      list.innerHTML = '<div class="no-models-message">暂无可用模型，请点击"刷新模型列表"获取</div>';
+    }
+
+    async function checkAIAvailability() {
+      const statusElement = document.getElementById('aiStatus');
+      const statusText = document.getElementById('aiStatusText');
+      const statusLight = document.getElementById('aiStatusLight');
+      
+      if (currentAIService === 'local') {
+        try {
+          const available = await ollamaClient.checkAvailability();
+          if (available) {
+            if (statusElement) statusElement.classList.remove('offline');
+            if (statusText) statusText.textContent = `Ollama已连接 (${ollamaClient.model})`;
+            if (statusLight) {
+              statusLight.className = 'ai-status-light';
+            }
+          } else {
+            if (statusElement) statusElement.classList.add('offline');
+            if (statusText) statusText.textContent = 'Ollama未连接';
+            if (statusLight) {
+              statusLight.className = 'ai-status-light off';
+            }
+          }
+        } catch (error) {
+          if (statusElement) statusElement.classList.add('offline');
+          if (statusText) statusText.textContent = 'Ollama未连接';
+          if (statusLight) {
+            statusLight.className = 'ai-status-light off';
+          }
+        }
+      } else {
+        if (cloudAIClient.isConfigured) {
+          if (statusElement) statusElement.classList.remove('offline');
+          if (statusText) statusText.textContent = `${getProviderName(cloudAIClient.config.provider)}已配置`;
+          if (statusLight) {
+            statusLight.className = 'ai-status-light';
+          }
+          updateCurrentConfigInfo();
+        } else {
+          if (statusElement) statusElement.classList.add('offline');
+          if (statusText) statusText.textContent = '云端API未配置';
+          if (statusLight) {
+            statusLight.className = 'ai-status-light warning';
+          }
+        }
+      }
+    }
+
+    function getProviderName(provider) {
+      const names = {
+        'openai': 'OpenAI', 'anthropic': 'Anthropic', 'azure': 'Azure',
+        'deepseek': 'DeepSeek', 'zhipu': '智谱AI', 'moonshot': 'Moonshot',
+        'qwen-api': '通义千问', 'custom': '自定义'
+      };
+      return names[provider] || provider;
+    }
+
+    function updateCurrentConfigInfo() {
+      const info = document.getElementById('currentConfigInfo');
+      if (cloudAIClient.isConfigured) {
+        info.innerHTML = `<strong>${getProviderName(cloudAIClient.config.provider)}</strong> - ${cloudAIClient.config.model}`;
+      } else {
+        info.textContent = '未配置API';
+      }
+      updateCurrentServiceInfo();
+    }
+
+    function updateCurrentServiceInfo() {
+      const currentServiceInfo = document.getElementById('currentServiceInfo');
+      const currentConfigInfo = document.getElementById('currentConfigInfo');
+      
+      if (currentServiceInfo && currentConfigInfo) {
+        let serviceName = currentAIService === 'cloud' ? '云端API' : '本地Ollama';
+        let configStatus = currentConfigInfo.textContent.trim();
+        
+        // 处理HTML内容
+        if (currentConfigInfo.innerHTML.includes('<strong>')) {
+          const temp = document.createElement('div');
+          temp.innerHTML = currentConfigInfo.innerHTML;
+          configStatus = temp.textContent.trim();
+        }
+        
+        currentServiceInfo.textContent = `${serviceName} - ${configStatus}`;
+      }
+    }
+
+    function setupEventListeners() {
+      // AI服务选择按钮点击
+      const aiServiceSection = document.querySelector('.ai-service-section');
+      const aiServiceModal = document.getElementById('aiServiceModal');
+      const closeAiServiceModal = document.getElementById('closeAiServiceModal');
+      
+      if (aiServiceSection && aiServiceModal && closeAiServiceModal) {
+        aiServiceSection.addEventListener('click', function() {
+          aiServiceModal.classList.add('active');
+        });
+        
+        closeAiServiceModal.addEventListener('click', function() {
+          aiServiceModal.classList.remove('active');
+        });
+        
+        aiServiceModal.addEventListener('click', function(e) {
+          if (e.target === aiServiceModal) {
+            aiServiceModal.classList.remove('active');
+          }
+        });
+      }
+
+      document.querySelectorAll('.service-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentAIService = this.dataset.service;
+          
+          // 显示或隐藏模型选择区域
+          const modelSelectSection = document.getElementById('modelSelectSection');
+          if (modelSelectSection) {
+            if (currentAIService === 'local') {
+              modelSelectSection.style.display = 'block';
+            } else {
+              modelSelectSection.style.display = 'none';
+            }
+          }
+          
+          // 更新已加载模型显示区域
+          initLoadedModelsDisplay();
+          
+          checkAIAvailability();
+          updateCurrentServiceInfo();
+        });
+      });
+
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          selectedTab = this.dataset.tab;
+          const manualPanel = document.getElementById('manualPanel');
+          const voicePanel = document.getElementById('voicePanel');
+          const uploadPanel = document.getElementById('uploadPanel');
+          if (manualPanel) manualPanel.style.display = selectedTab === 'manual' ? 'block' : 'none';
+          if (voicePanel) voicePanel.style.display = selectedTab === 'voice' ? 'block' : 'none';
+          if (uploadPanel) uploadPanel.style.display = selectedTab === 'upload' ? 'block' : 'none';
+        });
+      });
+
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentAIRole = this.dataset.role;
+        });
+      });
+
+      const addRoleBtn = document.getElementById('addRoleBtn');
+      if (addRoleBtn) {
+        addRoleBtn.addEventListener('click', () => {
+          const addRoleModal = document.getElementById('addRoleModal');
+          if (addRoleModal) addRoleModal.classList.add('active');
+        });
+      }
+
+      const closeRoleModal = document.getElementById('closeRoleModal');
+      if (closeRoleModal) {
+        closeRoleModal.addEventListener('click', () => {
+          const addRoleModal = document.getElementById('addRoleModal');
+          if (addRoleModal) addRoleModal.classList.remove('active');
+        });
+      }
+
+      const cancelAddRole = document.getElementById('cancelAddRole');
+      if (cancelAddRole) {
+        cancelAddRole.addEventListener('click', () => {
+          const addRoleModal = document.getElementById('addRoleModal');
+          if (addRoleModal) addRoleModal.classList.remove('active');
+        });
+      }
+
+      const saveNewRoleBtn = document.getElementById('saveNewRole');
+      if (saveNewRoleBtn) {
+        saveNewRoleBtn.addEventListener('click', saveNewRole);
+      }
+
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      if (analyzeBtn) analyzeBtn.addEventListener('click', analyzeContent);
+
+      const clearBtn = document.getElementById('clearBtn');
+      if (clearBtn) clearBtn.addEventListener('click', clearInput);
+
+      const startVoiceBtn = document.getElementById('startVoiceBtn');
+      if (startVoiceBtn) startVoiceBtn.addEventListener('click', startVoiceRecognition);
+
+      const fileInput = document.getElementById('fileInput');
+      const uploadDropZone = document.getElementById('uploadDropZone');
+      if (fileInput) fileInput.addEventListener('change', handleFileSelect);
+      if (uploadDropZone) {
+        uploadDropZone.addEventListener('click', () => fileInput && fileInput.click());
+        uploadDropZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadDropZone.style.borderColor = '#667eea'; });
+        uploadDropZone.addEventListener('dragleave', () => { uploadDropZone.style.borderColor = 'var(--border-color)'; });
+        uploadDropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uploadDropZone.style.borderColor = 'var(--border-color)';
+          if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+        });
+      }
+
+      // 模型选择事件
+      const ollamaModelSelect = document.getElementById('ollamaModelSelect');
+      if (ollamaModelSelect) {
+        ollamaModelSelect.addEventListener('change', function() {
+          const selectedModel = this.value;
+          ollamaClient.setModel(selectedModel);
+          checkAIAvailability();
+          showToast(`已切换到模型: ${selectedModel}`, 'success');
+        });
+      }
+
+      // 刷新模型列表事件
+      const refreshModelsBtn = document.getElementById('refreshModelsBtn');
+      if (refreshModelsBtn) {
+        refreshModelsBtn.addEventListener('click', async function() {
+          const btn = this;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<span>⏳</span> 刷新中...';
+          btn.disabled = true;
+          
+          try {
+            const models = await ollamaClient.getModels();
+            const select = document.getElementById('ollamaModelSelect');
+            if (select) {
+              select.innerHTML = '';
+              
+              if (models.length === 0) {
+                showToast('未找到可用的Ollama模型', 'error');
+                const option = document.createElement('option');
+                option.value = 'qwen3:8b';
+                option.textContent = 'qwen3:8b (默认)';
+                select.appendChild(option);
+              } else {
+                models.forEach(model => {
+                  const option = document.createElement('option');
+                  option.value = model.name;
+                  option.textContent = model.name + (model.details?.family ? ` (${model.details.family})` : '');
+                  select.appendChild(option);
+                });
+                
+                // 保持当前选择的模型
+                if (ollamaClient.model) {
+                  select.value = ollamaClient.model;
+                }
+                
+                showToast(`已加载 ${models.length} 个模型`, 'success');
+              }
+            }
+            
+            // 更新模型卡片
+            const modelList = document.getElementById('modelList');
+            if (modelList) {
+              renderLocalModelCards(models);
+            }
+            
+            // 更新首页已加载模型显示
+            if (models.length > 0) {
+              displayModelsAsTags(models);
+            } else {
+              displayNoModels();
+            }
+            
+          } catch (error) {
+            showToast('刷新模型列表失败', 'error');
+          } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+        });
+      }
+      
+      // 自动配置按钮事件
+      const autoConfigBtn = document.getElementById('autoConfigBtn');
+      if (autoConfigBtn) {
+        autoConfigBtn.addEventListener('click', runAutoConfig);
+      }
+
+      setupModalListeners();
+    }
+
+    function setupModalListeners() {
+      const modal = document.getElementById('cloudConfigModal');
+      const closeBtn = document.getElementById('closeModal');
+      const cancelBtn = document.getElementById('cancelCloudConfig');
+      const saveBtn = document.getElementById('saveCloudConfig');
+      const addApiBtn = document.getElementById('addApiConfig');
+      const apiConfigList = document.getElementById('apiConfigList');
+      const providerSelect = document.getElementById('apiProvider');
+
+      function renderApiConfigList() {
+        if (!apiConfigList) return;
+        apiConfigList.innerHTML = '';
+        if (cloudAIClient.configs.length === 0) {
+          apiConfigList.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">暂无API配置</div>';
+          return;
+        }
+        cloudAIClient.configs.forEach((config, index) => {
+          const item = document.createElement('div');
+          item.className = 'api-config-item';
+          if (index === cloudAIClient.currentConfigIndex) {
+            item.style.borderColor = 'var(--primary-color)';
+            item.style.background = 'rgba(102, 126, 234, 0.1)';
+          }
+          item.innerHTML = `
+            <div class="api-config-info">
+              <div class="api-config-name">${getProviderName(config.provider)}</div>
+              <div class="api-config-detail">模型: ${config.model} | ${config.apiKey ? '✓ 已设置密钥' : '✗ 未设置密钥'}</div>
+            </div>
+            <div class="api-config-actions">
+              <button class="btn btn-sm btn-primary" onclick="selectConfig(${index})">选择</button>
+              ${cloudAIClient.configs.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteConfig(${index})">删除</button>` : ''}
+            </div>
+          `;
+          apiConfigList.appendChild(item);
+        });
+      }
+
+      window.selectConfig = function(index) {
+        cloudAIClient.setCurrentConfigIndex(index);
+        loadCurrentConfig();
+        renderApiConfigList();
+      };
+
+      window.deleteConfig = function(index) {
+        if (confirm('确定要删除这个API配置吗？')) {
+          cloudAIClient.deleteConfig(index);
+          loadCurrentConfig();
+          renderApiConfigList();
+          showToast('配置已删除', 'success');
+        }
+      };
+
+      function loadCurrentConfig() {
+        const config = cloudAIClient.config;
+        const apiProvider = document.getElementById('apiProvider');
+        const apiKey = document.getElementById('apiKey');
+        const cloudModel = document.getElementById('cloudModel');
+        const apiBaseUrl = document.getElementById('apiBaseUrl');
+        
+        if (apiProvider) apiProvider.value = config.provider;
+        if (apiKey) apiKey.value = config.apiKey;
+        if (cloudModel) cloudModel.value = config.model;
+        if (apiBaseUrl) apiBaseUrl.value = config.baseUrl;
+        
+        updateCloudModelOptions(config.provider);
+        // 更新云端模型卡片选中状态
+        setTimeout(() => {
+          const cards = document.querySelectorAll('#cloudModelList .model-card');
+          cards.forEach(card => {
+            if (card.dataset.model === config.model) {
+              card.classList.add('active');
+            } else {
+              card.classList.remove('active');
+            }
+          });
+        }, 100);
+      }
+
+      const openConfigModal = document.getElementById('openConfigModal');
+      if (openConfigModal) {
+        openConfigModal.addEventListener('click', function() {
+          if (modal) modal.classList.add('active');
+          renderApiConfigList();
+          loadCurrentConfig();
+        });
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() { if (modal) modal.classList.remove('active'); });
+      }
+      
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() { if (modal) modal.classList.remove('active'); });
+      }
+      
+      if (modal) {
+        modal.addEventListener('click', function(e) { if (e.target === modal) modal.classList.remove('active'); });
+      }
+
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+          const provider = document.getElementById('apiProvider')?.value;
+          const apiKey = document.getElementById('apiKey')?.value;
+          const model = document.getElementById('cloudModel')?.value;
+          const baseUrl = document.getElementById('apiBaseUrl')?.value;
+          
+          cloudAIClient.setConfig({ provider, apiKey, model, baseUrl });
+          checkAIAvailability();
+          renderApiConfigList();
+          if (modal) modal.classList.remove('active');
+          showToast('配置已保存', 'success');
+        });
+      }
+
+      if (addApiBtn) {
+        addApiBtn.addEventListener('click', function() {
+          cloudAIClient.addConfig({ provider: 'openai', apiKey: '', model: 'gpt-4', baseUrl: '' });
+          loadCurrentConfig();
+          renderApiConfigList();
+        });
+      }
+
+      if (providerSelect) {
+        providerSelect.addEventListener('change', function() { updateCloudModelOptions(this.value); });
+      }
+    }
+
+    function updateCloudModelOptions(provider) {
+      const modelSelect = document.getElementById('cloudModel');
+      if (!modelSelect) return;
+      
+      const models = {
+        'openai': [
+          { value: 'gpt-4', label: 'GPT-4' },
+          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+          { value: 'gpt-4o', label: 'GPT-4o' }
+        ],
+        'anthropic': [
+          { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+          { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet' }
+        ],
+        'deepseek': [
+          { value: 'deepseek-chat', label: 'DeepSeek-V3' },
+          { value: 'deepseek-reasoner', label: 'DeepSeek-R1' }
+        ],
+        'zhipu': [
+          { value: 'glm-4', label: 'GLM-4' },
+          { value: 'glm-4-flash', label: 'GLM-4-Flash' }
+        ],
+        'moonshot': [
+          { value: 'moonshot-v1-8k', label: 'Moonshot V1 8K' },
+          { value: 'moonshot-v1-32k', label: 'Moonshot V1 32K' }
+        ],
+        'qwen-api': [
+          { value: 'qwen-turbo', label: 'Qwen Turbo' },
+          { value: 'qwen-plus', label: 'Qwen Plus' }
+        ],
+        'azure': [{ value: 'gpt-4', label: 'GPT-4' }],
+        'custom': [{ value: 'custom-model', label: '自定义模型' }]
+      };
+      modelSelect.innerHTML = '';
+      (models[provider] || []).forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.value;
+        option.textContent = model.label;
+        modelSelect.appendChild(option);
+      });
+      
+      // 同时更新云端模型卡片
+      try {
+        const cloudModelList = document.getElementById('cloudModelList');
+        if (cloudModelList) {
+          renderCloudModelCards(provider);
+        }
+      } catch (error) {
+        console.log('渲染云端模型卡片时出错:', error);
+      }
+    }
+
+    // 模型详细信息数据
+    const modelDatabase = {
+      'qwen3:8b': { name: 'Qwen3 8B', icon: '🌐', description: '通义千问3代，80亿参数', tags: ['中文', '通用', '8B'] },
+      'llama3:8b': { name: 'Llama3 8B', icon: '🦙', description: 'Meta最新开源模型，80亿参数', tags: ['英文', '通用', '8B'] },
+      'gemma2:9b': { name: 'Gemma2 9B', icon: '💎', description: 'Google开源模型，90亿参数', tags: ['英文', '通用', '9B'] },
+      'mistral:7b': { name: 'Mistral 7B', icon: '🌪️', description: 'Mistral AI开源模型', tags: ['英文', '通用', '7B'] },
+      'gpt-4': { name: 'GPT-4', icon: '🤖', description: 'OpenAI最强模型，强大的推理能力', tags: ['高级', '推理', 'OpenAI'] },
+      'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', icon: '⚡', description: '快速高效的模型，性价比高', tags: ['快速', '经济', 'OpenAI'] },
+      'gpt-4o': { name: 'GPT-4o', icon: '🌟', description: 'GPT-4优化版，更智能更快速', tags: ['最新', '优化', 'OpenAI'] },
+      'claude-3-opus-20240229': { name: 'Claude 3 Opus', icon: '🎭', description: 'Anthropic最强大的模型', tags: ['高级', '创意', 'Anthropic'] },
+      'claude-3-sonnet-20240229': { name: 'Claude 3 Sonnet', icon: '📖', description: '平衡性能与速度', tags: ['平衡', '通用', 'Anthropic'] },
+      'deepseek-chat': { name: 'DeepSeek-V3', icon: '🔍', description: '深度求索对话模型', tags: ['中文', '推理', 'DeepSeek'] },
+      'deepseek-reasoner': { name: 'DeepSeek-R1', icon: '🧠', description: '深度求索推理模型', tags: ['推理', '数学', 'DeepSeek'] },
+      'glm-4': { name: 'GLM-4', icon: '🎯', description: '智谱AI最新模型', tags: ['中文', '通用', '智谱'] },
+      'glm-4-flash': { name: 'GLM-4-Flash', icon: '💫', description: '快速响应版本', tags: ['快速', '经济', '智谱'] },
+      'moonshot-v1-8k': { name: 'Moonshot V1 8K', icon: '🌙', description: '月之暗面模型，8K上下文', tags: ['中文', '8K', 'Moonshot'] },
+      'moonshot-v1-32k': { name: 'Moonshot V1 32K', icon: '🌕', description: '月之暗面模型，32K长上下文', tags: ['中文', '32K', 'Moonshot'] },
+      'qwen-turbo': { name: 'Qwen Turbo', icon: '🚀', description: '通义千问快速版', tags: ['中文', '快速', '通义'] },
+      'qwen-plus': { name: 'Qwen Plus', icon: '✨', description: '通义千问增强版', tags: ['中文', '增强', '通义'] },
+      'custom-model': { name: '自定义模型', icon: '🔧', description: '用户自定义配置的模型', tags: ['自定义', '灵活'] }
+    };
+
+    // 渲染本地模型卡片
+    function renderLocalModelCards(models) {
+      const container = document.getElementById('modelList');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const displayModels = models.length > 0 ? models : [
+        { name: 'qwen3:8b' },
+        { name: 'llama3:8b' },
+        { name: 'gemma2:9b' },
+        { name: 'mistral:7b' }
+      ];
+      
+      displayModels.forEach(model => {
+        const modelInfo = modelDatabase[model.name] || {
+          name: model.name,
+          icon: '📦',
+          description: 'Ollama模型',
+          tags: ['本地']
+        };
+        
+        const card = document.createElement('div');
+        card.className = 'model-card';
+        card.dataset.model = model.name;
+        if (ollamaClient && model.name === ollamaClient.model) {
+          card.classList.add('active');
+        }
+        
+        card.innerHTML = `
+          <div class="model-icon">${modelInfo.icon}</div>
+          <div class="model-name">${modelInfo.name}</div>
+          <div class="model-description">${modelInfo.description}</div>
+          <div class="model-meta">
+            ${modelInfo.tags.map(tag => `<span class="model-tag">${tag}</span>`).join('')}
+          </div>
+        `;
+        
+        card.addEventListener('click', function() {
+          document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          if (ollamaClient) ollamaClient.setModel(model.name);
+          const select = document.getElementById('ollamaModelSelect');
+          if (select) select.value = model.name;
+          checkAIAvailability();
+          updateCurrentServiceInfo();
+          showToast(`已切换到模型: ${modelInfo.name}`, 'success');
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // 渲染云端模型卡片
+    function renderCloudModelCards(provider) {
+      const container = document.getElementById('cloudModelList');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const providerModels = {
+        'openai': ['gpt-4', 'gpt-3.5-turbo', 'gpt-4o'],
+        'anthropic': ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'],
+        'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
+        'zhipu': ['glm-4', 'glm-4-flash'],
+        'moonshot': ['moonshot-v1-8k', 'moonshot-v1-32k'],
+        'qwen-api': ['qwen-turbo', 'qwen-plus'],
+        'azure': ['gpt-4'],
+        'custom': ['custom-model']
+      };
+      
+      const models = providerModels[provider] || [];
+      
+      models.forEach(modelId => {
+        const modelInfo = modelDatabase[modelId] || {
+          name: modelId,
+          icon: '📦',
+          description: '云端模型',
+          tags: ['云端']
+        };
+        
+        const card = document.createElement('div');
+        card.className = 'model-card';
+        card.dataset.model = modelId;
+        if (cloudAIClient && cloudAIClient.config && modelId === cloudAIClient.config.model) {
+          card.classList.add('active');
+        }
+        
+        card.innerHTML = `
+          <div class="model-icon">${modelInfo.icon}</div>
+          <div class="model-name">${modelInfo.name}</div>
+          <div class="model-description">${modelInfo.description}</div>
+          <div class="model-meta">
+            ${modelInfo.tags.map(tag => `<span class="model-tag">${tag}</span>`).join('')}
+          </div>
+        `;
+        
+        card.addEventListener('click', function() {
+          document.querySelectorAll('#cloudModelList .model-card').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          const cloudModel = document.getElementById('cloudModel');
+          if (cloudModel) cloudModel.value = modelId;
+          showToast(`已选择模型: ${modelInfo.name}`, 'success');
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // 自动配置功能
+    async function runAutoConfig() {
+      const section = document.getElementById('autoConfigSection');
+      if (!section) return;
+      
+      const steps = document.querySelectorAll('.auto-config-step');
+      
+      section.style.display = 'block';
+      
+      // 重置步骤状态
+      steps.forEach((step, index) => {
+        step.classList.remove('completed', 'active');
+        const icon = step.querySelector('.auto-config-step-icon');
+        if (icon) icon.textContent = index + 1;
+      });
+      
+      try {
+        // 步骤1：检查Ollama连接
+        setStepActive(0);
+        await delay(800);
+        const available = await ollamaClient.checkAvailability();
+        if (!available) {
+          throw new Error('Ollama未连接，请确保Ollama正在运行');
+        }
+        setStepCompleted(0);
+        
+        // 步骤2：获取可用模型列表
+        setStepActive(1);
+        await delay(800);
+        const models = await ollamaClient.getModels();
+        const modelList = document.getElementById('modelList');
+        if (modelList) renderLocalModelCards(models);
+        setStepCompleted(1);
+        
+        // 步骤3：选择最优模型
+        setStepActive(2);
+        await delay(800);
+        let selectedModel = 'qwen3:8b'; // 默认
+        if (models.length > 0) {
+          // 优先选择中文模型
+          const preferredModels = models.filter(m => 
+            m.name.includes('qwen') || 
+            m.name.includes('glm') || 
+            m.name.includes('llama')
+          );
+          if (preferredModels.length > 0) {
+            selectedModel = preferredModels[0].name;
+          } else {
+            selectedModel = models[0].name;
+          }
+        }
+        
+        // 更新选择
+        ollamaClient.setModel(selectedModel);
+        const select = document.getElementById('ollamaModelSelect');
+        if (select) {
+          const option = document.createElement('option');
+          option.value = selectedModel;
+          option.textContent = selectedModel;
+          select.appendChild(option);
+          select.value = selectedModel;
+        }
+        
+        if (modelList) renderLocalModelCards(models);
+        setStepCompleted(2);
+        
+        // 步骤4：完成配置
+        setStepActive(3);
+        await delay(800);
+        checkAIAvailability();
+        updateCurrentServiceInfo();
+        setStepCompleted(3);
+        
+        // 更新首页已加载模型显示
+        const finalModels = await ollamaClient.getModels();
+        if (finalModels.length > 0) {
+          displayModelsAsTags(finalModels);
+        }
+        
+        showToast('自动配置完成！', 'success');
+        
+      } catch (error) {
+        showToast(`自动配置失败: ${error.message}`, 'error');
+      } finally {
+        // 3秒后隐藏步骤显示
+        setTimeout(() => {
+          if (section) section.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function setStepActive(index) {
+      const steps = document.querySelectorAll('.auto-config-step');
+      if (steps[index]) {
+        steps[index].classList.add('active');
+      }
+    }
+
+    function setStepCompleted(index) {
+      const steps = document.querySelectorAll('.auto-config-step');
+      if (steps[index]) {
+        steps[index].classList.remove('active');
+        steps[index].classList.add('completed');
+        const icon = steps[index].querySelector('.auto-config-step-icon');
+        if (icon) icon.textContent = '✓';
+      }
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = toast.querySelector('.toast-message');
+      const toastIcon = toast.querySelector('.toast-icon');
+      toast.className = 'toast ' + type;
+      toastMessage.textContent = message;
+      toastIcon.textContent = type === 'success' ? '✓' : '✗';
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function saveNewRole() {
+      const name = document.getElementById('newRoleName').value.trim();
+      const systemPrompt = document.getElementById('newRoleSystemPrompt').value.trim();
+      const analysisPrompt = document.getElementById('newRoleAnalysisPrompt').value.trim();
+
+      if (!name) {
+        showToast('请输入身份名称', 'error');
+        return;
+      }
+      if (!systemPrompt) {
+        showToast('请输入系统提示词', 'error');
+        return;
+      }
+      if (!analysisPrompt) {
+        showToast('请输入分析提示词', 'error');
+        return;
+      }
+
+      const customRoles = JSON.parse(localStorage.getItem('customAIRoles') || '[]');
+      const newRole = {
+        id: Date.now(),
+        name: name,
+        systemPrompt: systemPrompt,
+        analysisPrompt: analysisPrompt
+      };
+      customRoles.push(newRole);
+      localStorage.setItem('customAIRoles', JSON.stringify(customRoles));
+
+      document.getElementById('newRoleName').value = '';
+      document.getElementById('newRoleSystemPrompt').value = '';
+      document.getElementById('newRoleAnalysisPrompt').value = '';
+      document.getElementById('addRoleModal').classList.remove('active');
+
+      loadCustomRoles();
+      showToast('身份 "' + name + '" 添加成功', 'success');
+    }
+
+    function loadCustomRoles() {
+      const container = document.getElementById('roleButtonsContainer');
+      const customRoles = JSON.parse(localStorage.getItem('customAIRoles') || '[]');
+      customRoles.forEach(role => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'role-btn';
+        btn.dataset.role = 'custom_' + role.id;
+        btn.innerHTML = '👤 ' + role.name;
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentAIRole = this.dataset.role;
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function getAIRoleName(role) {
+      const roleNames = {
+        'analyst': '分析助手', 'project_manager': '项目经理',
+        'project_shepherd': '项目牧羊人', 'coach': '职场教练', 'technical': '技术专家'
+      };
+      if (role.startsWith('custom_')) {
+        const customRoles = JSON.parse(localStorage.getItem('customAIRoles') || '[]');
+        const roleId = role.replace('custom_', '');
+        const customRole = customRoles.find(r => r.id == roleId);
+        return customRole ? customRole.name : '自定义身份';
+      }
+      return roleNames[role] || role;
+    }
+
+    function getCurrentRolePrompts() {
+      const defaultPrompts = {
+        analyst: {
+          system: '你是一个专业的会议分析助手，负责分析会议内容并提供结构化的建议。',
+          prompt: '请分析以下会议内容，提取关键信息：${text}\n\n请以JSON格式返回分析结果，包含category（分类）、advice（建议）和tags（标签）。'
+        },
+        project_manager: {
+          system: '你是一个经验丰富的项目经理，擅长项目规划和进度管理。',
+          prompt: '作为项目经理，请分析以下内容，提供项目管理方面的建议：${text}\n\n请以JSON格式返回分析结果。'
+        },
+        project_shepherd: {
+          system: '你是一个的项目牧羊人，负责跟踪项目进展，确保团队协作顺畅。',
+          prompt: '作为项目牧羊人，请分析以下内容，跟踪项目进展并提供建议：${text}\n\n请以JSON格式返回分析结果。'
+        },
+        coach: {
+          system: '你是一个专业的职场教练，帮助职场人士提升能力和职业发展。',
+          prompt: '作为职场教练，请分析以下内容，提供职业发展建议：${text}\n\n请以JSON格式返回分析结果。'
+        },
+        technical: {
+          system: '你是一个资深的技术专家，精通各种技术方案和最佳实践。',
+          prompt: '作为技术专家，请分析以下技术内容，提供专业建议：${text}\n\n请以JSON格式返回分析结果。'
+        }
+      };
+      const customRoles = JSON.parse(localStorage.getItem('customAIRoles') || '[]');
+      customRoles.forEach(role => {
+        defaultPrompts['custom_' + role.id] = {
+          system: role.systemPrompt,
+          prompt: role.analysisPrompt
+        };
+      });
+      return defaultPrompts;
+    }
+
+    async function analyzeContent() {
+      let text = '';
+      if (selectedTab === 'manual') text = document.getElementById('manualInput').value;
+      else if (selectedTab === 'voice') text = document.getElementById('voiceTranscript').value;
+      else if (selectedTab === 'upload') text = document.getElementById('fileList').textContent;
+
+      if (!text || !text.trim()) {
+        showToast('请输入内容进行分析', 'error');
+        return;
+      }
+
+      setLoadingState('分析中...');
+
+      try {
+        let result, meta;
+        if (currentAIService === 'local') {
+          result = await ollamaClient.analyze(text, currentAIRole);
+          meta = ollamaClient.isAvailable
+            ? `使用本地Ollama AI分析 (模型: ${ollamaClient.model}, 身份: ${getAIRoleName(currentAIRole)})`
+            : 'Ollama服务不可用，使用备用模式';
+        } else {
+          clearAnalysisProcess();
+          document.getElementById('analysisCategory').textContent = '分析中...';
+          document.getElementById('analysisAdvice').textContent = 'AI正在分析，请稍候...';
+          let streamingAdvice = '';
+          const onStream = (chunk, fullContent) => {
+            streamingAdvice = fullContent;
+            document.getElementById('analysisAdvice').textContent = streamingAdvice;
+          };
+          result = await cloudAIClient.analyze(text, currentAIRole, onStream);
+          meta = `使用云端API分析 (${cloudAIClient.config.provider} - ${cloudAIClient.config.model}, 身份: ${getAIRoleName(currentAIRole)})`;
+        }
+        updateAnalysisResult('分析完成', result.category, result.advice, result.tags, meta);
+        showToast('分析完成！', 'success');
+      } catch (error) {
+        console.error('分析失败:', error);
+        updateAnalysisResult('分析失败', '-', `分析过程中出现错误: ${error.message}`, []);
+        showToast('分析失败: ' + error.message, 'error');
+      }
+    }
+
+    function clearInput() {
+      if (selectedTab === 'manual') document.getElementById('manualInput').value = '';
+      else if (selectedTab === 'voice') document.getElementById('voiceTranscript').value = '';
+      else if (selectedTab === 'upload') {
+        document.getElementById('fileList').textContent = '';
+        uploadedFiles = [];
+      }
+      updateAnalysisResult('等待输入...', '-', '请输入内容后点击"AI智能分析"按钮开始分析', []);
+      showToast('已清空输入', 'success');
+    }
+
+    function startVoiceRecognition() {
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        const startBtn = document.getElementById('startVoiceBtn');
+        const transcript = document.getElementById('voiceTranscript');
+        startBtn.classList.add('recording');
+        startBtn.textContent = '🔴';
+        transcript.value = '';
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript_text = event.results[i][0].transcript;
+            if (event.results[i].isFinal) finalTranscript += transcript_text;
+            else interimTranscript += transcript_text;
+          }
+          transcript.value = finalTranscript + interimTranscript;
+        };
+        recognition.onerror = (event) => {
+          console.error('语音识别错误:', event.error);
+          startBtn.classList.remove('recording');
+          startBtn.textContent = '🎤';
+          showToast('语音识别失败', 'error');
+        };
+        recognition.onend = () => {
+          startBtn.classList.remove('recording');
+          startBtn.textContent = '🎤';
+        };
+        recognition.start();
+      } else {
+        showToast('您的浏览器不支持语音识别功能', 'error');
+      }
+    }
+
+    function handleFileSelect(event) { handleFiles(event.target.files); }
+
+    function handleFiles(files) {
+      uploadedFiles = Array.from(files);
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      uploadedFiles.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <div class="file-icon">📄</div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${(file.size / 1024).toFixed(2)}KB</div>
+          </div>
+        `;
+        fileList.appendChild(fileItem);
+      });
+      if (uploadedFiles.length > 0) {
+        Promise.all(uploadedFiles.map(readFileContent)).then(contents => {
+          const combinedContent = contents.join('\n\n');
+          fileList.dataset.content = combinedContent;
+          showToast(`已上传 ${uploadedFiles.length} 个文件`, 'success');
+        });
+      }
+    }
+
+    function readFileContent(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsText(file);
+      });
+    }
+
+    function updateAnalysisResult(status, category, advice, tags, meta) {
+      clearAnalysisProcess();
+      document.getElementById('analysisCategory').textContent = category;
+      document.getElementById('analysisAdvice').textContent = advice;
+      const tagsNode = document.getElementById('analysisTags');
+      tagsNode.innerHTML = (tags || []).map(tag => `<span class="tag">${tag}</span>`).join('');
+      document.getElementById('analysisTimestamp').textContent = new Date().toLocaleString();
+      document.getElementById('analysisMeta').textContent = meta;
+    }
+
+    function setLoadingState(text) {
+      document.getElementById('analysisCategory').textContent = text;
+      document.getElementById('analysisAdvice').textContent = '请稍候，AI正在思考...';
+      document.getElementById('analysisTags').innerHTML = '';
+      document.getElementById('analysisMeta').textContent = '加载中...';
+      showAnalysisProcess();
+    }
+
+    function showAnalysisProcess() {
+      const adviceElement = document.getElementById('analysisAdvice');
+      const originalText = adviceElement.textContent;
+      let dots = 0;
+      const processInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        adviceElement.textContent = originalText + '.'.repeat(dots);
+      }, 500);
+      window.analysisProcessInterval = processInterval;
+    }
+
+    function clearAnalysisProcess() {
+      if (window.analysisProcessInterval) {
+        clearInterval(window.analysisProcessInterval);
+        window.analysisProcessInterval = null;
+      }
+    }
+
+    class CloudAIClient {
+      constructor() {
+        this.configs = [];
+        this.currentConfigIndex = 0;
+        this.isConfigured = false;
+      }
+
+      setConfig(config) {
+        if (this.configs.length === 0) this.configs.push(config);
+        else this.configs[this.currentConfigIndex] = config;
+        this.isConfigured = !!config.apiKey;
+        this.saveConfigs();
+      }
+
+      addConfig(config) {
+        this.configs.push(config);
+        this.currentConfigIndex = this.configs.length - 1;
+        this.isConfigured = !!config.apiKey;
+        this.saveConfigs();
+      }
+
+      deleteConfig(index) {
+        if (this.configs.length > 1) {
+          this.configs.splice(index, 1);
+          if (this.currentConfigIndex >= this.configs.length) this.currentConfigIndex = this.configs.length - 1;
+          this.isConfigured = !!this.configs[this.currentConfigIndex].apiKey;
+          this.saveConfigs();
+        }
+      }
+
+      setCurrentConfigIndex(index) {
+        if (index >= 0 && index < this.configs.length) {
+          this.currentConfigIndex = index;
+          this.isConfigured = !!this.configs[this.currentConfigIndex].apiKey;
+          this.saveConfigs();
+        }
+      }
+
+      get config() {
+        return this.configs[this.currentConfigIndex] || { provider: 'openai', apiKey: '', model: 'gpt-4', baseUrl: '' };
+      }
+
+      saveConfigs() {
+        localStorage.setItem('cloudAIConfigs', JSON.stringify({ configs: this.configs, currentIndex: this.currentConfigIndex }));
+      }
+
+      loadConfig() {
+        const savedData = localStorage.getItem('cloudAIConfigs');
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          this.configs = data.configs || [];
+          this.currentConfigIndex = data.currentIndex || 0;
+          this.isConfigured = this.configs.length > 0 && !!this.configs[this.currentConfigIndex].apiKey;
+        } else {
+          const oldConfig = localStorage.getItem('cloudAIConfig');
+          if (oldConfig) {
+            this.configs = [JSON.parse(oldConfig)];
+            this.currentConfigIndex = 0;
+            this.isConfigured = !!this.configs[0].apiKey;
+            this.saveConfigs();
+          }
+        }
+      }
+
+      async analyze(text, role = 'analyst', onStream) {
+        if (!this.isConfigured) throw new Error('云端API未配置');
+        try {
+          const currentPrompts = getCurrentRolePrompts();
+          const roleConfig = currentPrompts[role] || currentPrompts.analyst;
+          const prompt = roleConfig.prompt.replace('${text}', text);
+          let url, headers, body;
+          switch (this.config.provider) {
+            case 'openai':
+              url = this.config.baseUrl || 'https://api.openai.com/v1/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+              break;
+            case 'anthropic':
+              url = this.config.baseUrl || 'https://api.anthropic.com/v1/messages';
+              headers = { 'Content-Type': 'application/json', 'x-api-key': this.config.apiKey, 'anthropic-version': '2023-06-01' };
+              body = { model: this.config.model, messages: [{ role: 'user', content: `${roleConfig.system}\n\n${prompt}` }], temperature: 0.3, stream: !!onStream };
+              break;
+            case 'deepseek':
+              url = this.config.baseUrl || 'https://api.deepseek.com/v1/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+              break;
+            case 'zhipu':
+              url = this.config.baseUrl || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+              break;
+            case 'moonshot':
+              url = this.config.baseUrl || 'https://api.moonshot.cn/v1/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+              break;
+            case 'qwen-api':
+              url = this.config.baseUrl || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+              break;
+            default:
+              url = this.config.baseUrl + '/chat/completions' || 'https://api.openai.com/v1/chat/completions';
+              headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.config.apiKey}` };
+              body = { model: this.config.model, messages: [{ role: 'system', content: roleConfig.system }, { role: 'user', content: prompt }], temperature: 0.3, stream: !!onStream };
+          }
+          const response = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+          if (!response.ok) {
+            try {
+              const errorData = await response.json();
+              const errorMessage = errorData.error?.message || errorData.message || response.statusText;
+              throw new Error(`API调用失败 (${response.status}): ${errorMessage}`);
+            } catch (e) { throw new Error(`API调用失败 (${response.status}): ${response.statusText}`); }
+          }
+          if (onStream) return this.handleStreamResponse(response, onStream);
+          const data = await response.json();
+          let responseText = data.choices?.[0]?.message?.content || data.content?.[0]?.text || '';
+          try { return JSON.parse(responseText); }
+          catch (e) { return { category: '会议纪要', advice: 'AI分析完成，内容已处理。', tags: ['AI分析', '会议'] }; }
+        } catch (error) { console.error('云端API调用失败:', error); throw error; }
+      }
+
+      async handleStreamResponse(response, onStream) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let fullResponse = '';
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.slice(6);
+              if (dataStr === '[DONE]') continue;
+              try {
+                const data = JSON.parse(dataStr);
+                let content = '';
+                if (data.choices?.[0]?.delta?.content) content = data.choices[0].delta.content;
+                else if (data.type === 'content_block_delta' && data.delta?.text) content = data.delta.text;
+                if (content) { fullResponse += content; onStream(content, fullResponse); }
+              } catch (e) { console.error('解析流式响应失败:', e); }
+            }
+          }
+        }
+        try { return JSON.parse(fullResponse); }
+        catch (e) { return { category: '会议纪要', advice: 'AI分析完成，内容已处理。', tags: ['AI分析', '会议'] }; }
+      }
+    }
+
+    class OllamaClient {
+      constructor() {
+        this.baseUrl = 'http://localhost:11434';
+        this.model = localStorage.getItem('ollamaModel') || 'qwen3:8b';
+        this.isAvailable = false;
+      }
+
+      async checkAvailability() {
+        try {
+          const response = await fetch(`${this.baseUrl}/api/tags`);
+          this.isAvailable = response.ok;
+          return response.ok;
+        } catch (error) {
+          this.isAvailable = false;
+          return false;
+        }
+      }
+
+      async getModels() {
+        try {
+          const response = await fetch(`${this.baseUrl}/api/tags`);
+          if (!response.ok) throw new Error('获取模型列表失败');
+          const data = await response.json();
+          return data.models || [];
+        } catch (error) {
+          console.error('获取模型列表失败:', error);
+          return [];
+        }
+      }
+
+      setModel(model) {
+        this.model = model;
+        localStorage.setItem('ollamaModel', model);
+      }
+
+      async analyze(text, role = 'analyst') {
+        const currentPrompts = getCurrentRolePrompts();
+        const roleConfig = currentPrompts[role] || currentPrompts.analyst;
+        const prompt = `${roleConfig.system}\n\n${roleConfig.prompt.replace('${text}', text)}`;
+        try {
+          const response = await fetch(`${this.baseUrl}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: this.model, prompt, stream: false })
+          });
+          if (!response.ok) throw new Error(`Ollama API错误: ${response.statusText}`);
+          const data = await response.json();
+          try { return JSON.parse(data.response); }
+          catch (e) { return { category: '分析结果', advice: data.response, tags: ['Ollama分析'] }; }
+        } catch (error) {
+          console.error('Ollama分析失败:', error);
+          return { category: '备用分析', advice: `分析内容: ${text.substring(0, 100)}...`, tags: ['本地分析'] };
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

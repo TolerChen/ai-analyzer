@@ -1,0 +1,28 @@
+{
+  "name": "ai-analyzer",
+  "version": "1.0.0",
+  "description": "独立的AI分析工具，支持多种输入方式和智能分析",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node tests/test.js",
+    "dev": "node src/server.js"
+  },
+  "keywords": [
+    "ai",
+    "analysis",
+    "ollama",
+    "会议分析",
+    "智能分类"
+  ],
+  "author": "AI Analyzer",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
